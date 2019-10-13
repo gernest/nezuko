@@ -7,10 +7,11 @@
 package modcmd
 
 import (
-	"github.com/gernest/nezuko/internal/base"
-	"github.com/gernest/nezuko/internal/modload"
 	"os"
 	"strings"
+
+	"github.com/gernest/nezuko/internal/base"
+	"github.com/gernest/nezuko/internal/modload"
 )
 
 var cmdInit = &base.Command{
@@ -35,11 +36,11 @@ func runInit(cmd *base.Command, args []string) {
 	if len(args) == 1 {
 		modload.CmdModModule = args[0]
 	}
-	if _, err := os.Stat("go.mod"); err == nil {
-		base.Fatalf("go mod init: go.mod already exists")
+	if _, err := os.Stat("z.mod"); err == nil {
+		base.Fatalf("z mod init: z.mod already exists")
 	}
 	if strings.Contains(modload.CmdModModule, "@") {
-		base.Fatalf("go mod init: module path must not contain '@'")
+		base.Fatalf("z mod init: module path must not contain '@'")
 	}
 	modload.InitMod() // does all the hard work
 }

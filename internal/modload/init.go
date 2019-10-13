@@ -8,6 +8,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/build"
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+	"regexp"
+	"runtime/debug"
+	"strconv"
+	"strings"
+
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cache"
 	"github.com/gernest/nezuko/internal/cfg"
@@ -20,15 +30,6 @@ import (
 	"github.com/gernest/nezuko/internal/mvs"
 	"github.com/gernest/nezuko/internal/renameio"
 	"github.com/gernest/nezuko/internal/search"
-	"go/build"
-	"io/ioutil"
-	"os"
-	"path"
-	"path/filepath"
-	"regexp"
-	"runtime/debug"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -327,7 +328,7 @@ func InitMod() {
 		return
 	}
 
-	gomod := filepath.Join(modRoot, "go.mod")
+	gomod := filepath.Join(modRoot, "z.mod")
 	data, err := ioutil.ReadFile(gomod)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -336,13 +337,13 @@ func InitMod() {
 			WriteGoMod()
 			return
 		}
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	f, err := modfile.Parse(gomod, data, fixVersion)
 	if err != nil {
 		// Errors returned by modfile.Parse begin with file:line.
-		base.Fatalf("go: errors parsing go.mod:\n%s\n", err)
+		base.Fatalf("z: errors parsing go.mod:\n%s\n", err)
 	}
 	modFile = f
 	modFileData = data
@@ -351,7 +352,7 @@ func InitMod() {
 		// Empty mod file. Must add module path.
 		path, err := FindModulePath(modRoot)
 		if err != nil {
-			base.Fatalf("go: %v", err)
+			base.Fatalf("z: %v", err)
 		}
 		f.AddModuleStmt(path)
 	}
