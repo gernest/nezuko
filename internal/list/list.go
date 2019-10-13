@@ -380,16 +380,14 @@ func runList(cmd *base.Command, args []string) {
 			base.Fatalf("go list -test cannot be used with -m")
 		}
 
-		if modload.Init(); !modload.Enabled() {
-			base.Fatalf("go list -m: not using modules")
-		}
+		modload.Init()
 		modload.LoadBuildList()
 
 		mods := modload.ListModules(args, *listU, *listVersions)
 		if !*listE {
 			for _, m := range mods {
 				if m.Error != nil {
-					base.Errorf("go list -m %s: %v", m.Path, m.Error.Err)
+					base.Errorf("z list -m %s: %v", m.Path, m.Error.Err)
 				}
 			}
 			base.ExitIfErrors()

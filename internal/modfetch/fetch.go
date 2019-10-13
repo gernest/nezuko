@@ -260,7 +260,7 @@ func downloadZip(mod module.Version, zipfile string) (err error) {
 	return nil
 }
 
-var GoSumFile string // path to go.sum; set by package modload
+var ZigSumFile string // path to z.sum; set by package modload
 
 type modSum struct {
 	mod module.Version
@@ -281,7 +281,7 @@ var goSum struct {
 // It reports whether use of go.sum is now enabled.
 // The goSum lock must be held.
 func initGoSum() bool {
-	if GoSumFile == "" {
+	if ZigSumFile == "" {
 		return false
 	}
 	if goSum.m != nil {
@@ -290,16 +290,16 @@ func initGoSum() bool {
 
 	goSum.m = make(map[module.Version][]string)
 	goSum.checked = make(map[modSum]bool)
-	data, err := ioutil.ReadFile(GoSumFile)
+	data, err := ioutil.ReadFile(ZigSumFile)
 	if err != nil && !os.IsNotExist(err) {
 		base.Fatalf("go: %v", err)
 	}
 	goSum.enabled = true
-	readGoSum(goSum.m, GoSumFile, data)
+	readGoSum(goSum.m, ZigSumFile, data)
 
 	// Add old go.modverify file.
 	// We'll delete go.modverify in WriteGoSum.
-	alt := strings.TrimSuffix(GoSumFile, ".sum") + ".modverify"
+	alt := strings.TrimSuffix(ZigSumFile, ".sum") + ".modverify"
 	if data, err := ioutil.ReadFile(alt); err == nil {
 		migrate := make(map[module.Version][]string)
 		readGoSum(migrate, alt, data)
@@ -440,8 +440,8 @@ func Sum(mod module.Version) string {
 	return strings.TrimSpace(string(data))
 }
 
-// WriteGoSum writes the go.sum file if it needs to be updated.
-func WriteGoSum() {
+// WriteZigSum writes the z.sum file if it needs to be updated.
+func WriteZigSum() {
 	goSum.mu.Lock()
 	defer goSum.mu.Unlock()
 
@@ -478,16 +478,16 @@ func WriteGoSum() {
 	if !goSum.overwrite {
 		// Re-read the go.sum file to incorporate any sums added by other processes
 		// in the meantime.
-		data, err := ioutil.ReadFile(GoSumFile)
+		data, err := ioutil.ReadFile(ZigSumFile)
 		if err != nil && !os.IsNotExist(err) {
-			base.Fatalf("go: re-reading go.sum: %v", err)
+			base.Fatalf("z: re-reading go.sum: %v", err)
 		}
 
 		// Add only the sums that we actually checked: the user may have edited or
 		// truncated the file to remove erroneous hashes, and we shouldn't restore
 		// them without good reason.
 		goSum.m = make(map[module.Version][]string, len(goSum.m))
-		readGoSum(goSum.m, GoSumFile, data)
+		readGoSum(goSum.m, ZigSumFile, data)
 		for ms := range goSum.checked {
 			checkOneSumLocked(ms.mod, ms.sum)
 		}
@@ -507,7 +507,7 @@ func WriteGoSum() {
 		}
 	}
 
-	if err := renameio.WriteFile(GoSumFile, buf.Bytes()); err != nil {
+	if err := renameio.WriteFile(ZigSumFile, buf.Bytes()); err != nil {
 		base.Fatalf("go: writing go.sum: %v", err)
 	}
 

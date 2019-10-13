@@ -8,6 +8,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime/debug"
+	"strings"
+
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/goroot"
@@ -15,10 +20,6 @@ import (
 	"github.com/gernest/nezuko/internal/modinfo"
 	"github.com/gernest/nezuko/internal/module"
 	"github.com/gernest/nezuko/internal/search"
-	"os"
-	"path/filepath"
-	"runtime/debug"
-	"strings"
 )
 
 var (
@@ -27,7 +28,7 @@ var (
 )
 
 func isStandardImportPath(path string) bool {
-	return findStandardImportPath(path) != ""
+	return strings.HasPrefix(path, "std")
 }
 
 func findStandardImportPath(path string) string {
@@ -46,16 +47,13 @@ func findStandardImportPath(path string) string {
 }
 
 func PackageModuleInfo(pkgpath string) *modinfo.ModulePublic {
-	if isStandardImportPath(pkgpath) || !Enabled() {
+	if isStandardImportPath(pkgpath) {
 		return nil
 	}
 	return moduleInfo(findModule(pkgpath, pkgpath), true)
 }
 
 func ModuleInfo(path string) *modinfo.ModulePublic {
-	if !Enabled() {
-		return nil
-	}
 
 	if i := strings.Index(path, "@"); i >= 0 {
 		return moduleInfo(module.Version{Path: path[:i], Version: path[i+1:]}, false)
@@ -184,7 +182,7 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 }
 
 func PackageBuildInfo(path string, deps []string) string {
-	if isStandardImportPath(path) || !Enabled() {
+	if isStandardImportPath(path) {
 		return ""
 	}
 

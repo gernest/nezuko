@@ -117,7 +117,7 @@ func ExtraEnvVars() []cfg.EnvVar {
 	gomod := ""
 	if modload.HasModRoot() {
 		gomod = filepath.Join(modload.ModRoot(), "go.mod")
-	} else if modload.Enabled() {
+	} else {
 		gomod = os.DevNull
 	}
 	return []cfg.EnvVar{

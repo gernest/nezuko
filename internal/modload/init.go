@@ -22,7 +22,6 @@ import (
 	"github.com/gernest/nezuko/internal/cache"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/load"
-	"github.com/gernest/nezuko/internal/modconv"
 	"github.com/gernest/nezuko/internal/modfetch"
 	"github.com/gernest/nezuko/internal/modfetch/codehost"
 	"github.com/gernest/nezuko/internal/modfile"
@@ -33,9 +32,8 @@ import (
 )
 
 var (
-	cwd            string // TODO(bcmills): Is this redundant with base.Cwd?
-	MustUseModules = mustUseModules()
-	initialized    bool
+	cwd         string // TODO(bcmills): Is this redundant with base.Cwd?
+	initialized bool
 
 	modRoot     string
 	modFile     *modfile.File
@@ -80,8 +78,6 @@ func mustUseModules() bool {
 	return strings.HasPrefix(name, "vgo")
 }
 
-var inGOPATH bool // running in GOPATH/src
-
 // Init determines whether module mode is enabled, locates the root of the
 // current module (if any), sets environment variables for Git subprocesses, and
 // configures the cfg, codehost, load, modfetch, and search packages for use
@@ -91,20 +87,6 @@ func Init() {
 		return
 	}
 	initialized = true
-
-	env := os.Getenv("GO111MODULE")
-	switch env {
-	default:
-		base.Fatalf("go: unknown environment setting GO111MODULE=%s", env)
-	case "", "auto":
-		// leave MustUseModules alone
-	case "on":
-		MustUseModules = true
-	case "off":
-		if !MustUseModules {
-			return
-		}
-	}
 
 	// Disable any prompting for passwords by Git.
 	// Only has an effect for 2.3.0 or later, but avoiding
@@ -136,42 +118,15 @@ func Init() {
 	var err error
 	cwd, err = os.Getwd()
 	if err != nil {
-		base.Fatalf("go: %v", err)
-	}
-
-	inGOPATH = false
-	for _, gopath := range filepath.SplitList(cfg.BuildContext.GOPATH) {
-		if gopath == "" {
-			continue
-		}
-		if search.InDir(cwd, filepath.Join(gopath, "src")) != "" {
-			inGOPATH = true
-			break
-		}
-	}
-
-	if inGOPATH && !MustUseModules {
-		if CmdModInit {
-			die() // Don't init a module that we're just going to ignore.
-		}
-		// No automatic enabling in GOPATH.
-		if root, _ := FindModuleRoot(cwd, "", false); root != "" {
-			cfg.GoModInGOPATH = filepath.Join(root, "go.mod")
-		}
-		return
+		base.Fatalf("z: %v", err)
 	}
 
 	if CmdModInit {
-		// Running 'go mod init': go.mod will be created in current directory.
+		// Running 'z mod init': go.mod will be created in current directory.
 		modRoot = cwd
 	} else {
-		modRoot, _ = FindModuleRoot(cwd, "", MustUseModules)
+		modRoot, _ = FindModuleRoot(cwd, "", true)
 		if modRoot == "" {
-			if !MustUseModules {
-				// GO111MODULE is 'auto' (or unset), and we can't find a module root.
-				// Stay in GOPATH mode.
-				return
-			}
 		} else if search.InDir(modRoot, os.TempDir()) == "." {
 			// If you create /tmp/go.mod for experimenting,
 			// then any tests that create work directories under /tmp
@@ -179,7 +134,7 @@ func Init() {
 			// It's a bit of a peculiar thing to disallow but quite mysterious
 			// when it happens. See golang.org/issue/26708.
 			modRoot = ""
-			fmt.Fprintf(os.Stderr, "go: warning: ignoring go.mod in system temp root %v\n", os.TempDir())
+			fmt.Fprintf(os.Stderr, "z: warning: ignoring z.mod in system temp root %v\n", os.TempDir())
 		}
 	}
 
@@ -188,7 +143,7 @@ func Init() {
 	if c := cache.Default(); c == nil {
 		// With modules, there are no install locations for packages
 		// other than the build cache.
-		base.Fatalf("go: cannot use modules with build cache disabled")
+		base.Fatalf("z: cannot use modules with build cache disabled")
 	}
 
 	list := filepath.SplitList(cfg.BuildContext.GOPATH)
@@ -247,7 +202,7 @@ func Init() {
 		// modules we download: that doesn't protect us against bad top-level
 		// modules, but it at least ensures consistency for transitive dependencies.
 	} else {
-		modfetch.GoSumFile = filepath.Join(modRoot, "go.sum")
+		modfetch.ZigSumFile = filepath.Join(modRoot, "z.sum")
 		search.SetModRoot(modRoot)
 	}
 }
@@ -259,15 +214,6 @@ func init() {
 	if list := filepath.SplitList(cfg.BuildContext.GOPATH); len(list) > 0 && list[0] != "" {
 		modfetch.PkgMod = filepath.Join(list[0], "pkg/mod")
 	}
-}
-
-// Enabled reports whether modules are (or must be) enabled.
-// If modules are enabled but there is no main module, Enabled returns true
-// and then the first use of module information will call die
-// (usually through MustModRoot).
-func Enabled() bool {
-	Init()
-	return modRoot != "" || MustUseModules
 }
 
 // ModRoot returns the root of the main module.
@@ -297,13 +243,7 @@ func die() {
 	if printStackInDie {
 		debug.PrintStack()
 	}
-	if os.Getenv("GO111MODULE") == "off" {
-		base.Fatalf("go: modules disabled by GO111MODULE=off; see 'go help modules'")
-	}
-	if inGOPATH && !MustUseModules {
-		base.Fatalf("go: modules disabled inside GOPATH/src by GO111MODULE=auto; see 'go help modules'")
-	}
-	base.Fatalf("go: cannot find main module; see 'go help modules'")
+	base.Fatalf("z: cannot find main module; see 'z help modules'")
 }
 
 // InitMod sets Target and, if there is a main module, parses the initial build
@@ -398,27 +338,6 @@ func legacyModInit() {
 	}
 
 	addGoStmt()
-
-	for _, name := range altConfigs {
-		cfg := filepath.Join(modRoot, name)
-		data, err := ioutil.ReadFile(cfg)
-		if err == nil {
-			convert := modconv.Converters[name]
-			if convert == nil {
-				return
-			}
-			fmt.Fprintf(os.Stderr, "go: copying requirements from %s\n", base.ShortPath(cfg))
-			cfg = filepath.ToSlash(cfg)
-			if err := modconv.ConvertLegacyConfig(modFile, cfg, data); err != nil {
-				base.Fatalf("go: %v", err)
-			}
-			if len(modFile.Syntax.Stmt) == 1 {
-				// Add comment to avoid re-converting every time it runs.
-				modFile.AddComment("// go: no requirements found in " + name)
-			}
-			return
-		}
-	}
 }
 
 // InitGoStmt adds a go statement, unless there already is one.
@@ -634,7 +553,7 @@ func WriteGoMod() {
 		reqs := MinReqs()
 		min, err := reqs.Required(Target)
 		if err != nil {
-			base.Fatalf("go: %v", err)
+			base.Fatalf("z: %v", err)
 		}
 		var list []*modfile.Require
 		for _, m := range min {
@@ -649,12 +568,12 @@ func WriteGoMod() {
 	modFile.Cleanup() // clean file after edits
 	new, err := modFile.Format()
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	// Always update go.sum, even if we didn't change go.mod: we may have
 	// downloaded modules that we didn't have before.
-	modfetch.WriteGoSum()
+	modfetch.WriteZigSum()
 
 	if bytes.Equal(new, modFileData) {
 		// We don't need to modify go.mod from what we read previously.
