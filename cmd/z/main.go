@@ -16,64 +16,29 @@ import (
 	"strings"
 
 	"github.com/gernest/nezuko/cmd/z/internal/base"
-	"github.com/gernest/nezuko/cmd/z/internal/bug"
 	"github.com/gernest/nezuko/cmd/z/internal/cfg"
-	"github.com/gernest/nezuko/cmd/z/internal/clean"
-	"github.com/gernest/nezuko/cmd/z/internal/doc"
 	"github.com/gernest/nezuko/cmd/z/internal/envcmd"
-	"github.com/gernest/nezuko/cmd/z/internal/fix"
-	"github.com/gernest/nezuko/cmd/z/internal/fmtcmd"
-	"github.com/gernest/nezuko/cmd/z/internal/generate"
-	"github.com/gernest/nezuko/cmd/z/internal/get"
 	"github.com/gernest/nezuko/cmd/z/internal/help"
 	"github.com/gernest/nezuko/cmd/z/internal/list"
 	"github.com/gernest/nezuko/cmd/z/internal/modcmd"
 	"github.com/gernest/nezuko/cmd/z/internal/modfetch"
 	"github.com/gernest/nezuko/cmd/z/internal/modget"
 	"github.com/gernest/nezuko/cmd/z/internal/modload"
-	"github.com/gernest/nezuko/cmd/z/internal/run"
-	"github.com/gernest/nezuko/cmd/z/internal/test"
-	"github.com/gernest/nezuko/cmd/z/internal/tool"
 	"github.com/gernest/nezuko/cmd/z/internal/version"
-	"github.com/gernest/nezuko/cmd/z/internal/vet"
-	"github.com/gernest/nezuko/cmd/z/internal/work"
 )
 
 func init() {
 	base.Go.Commands = []*base.Command{
-		bug.CmdBug,
-		work.CmdBuild,
-		clean.CmdClean,
-		doc.CmdDoc,
 		envcmd.CmdEnv,
-		fix.CmdFix,
-		fmtcmd.CmdFmt,
-		generate.CmdGenerate,
 		modget.CmdGet,
-		work.CmdInstall,
 		list.CmdList,
 		modcmd.CmdMod,
-		run.CmdRun,
-		test.CmdTest,
-		tool.CmdTool,
 		version.CmdVersion,
-		vet.CmdVet,
 
-		help.HelpBuildmode,
-		help.HelpC,
-		help.HelpCache,
-		help.HelpEnvironment,
-		help.HelpFileType,
-		modload.HelpGoMod,
-		help.HelpGopath,
-		get.HelpGopathGet,
 		modfetch.HelpGoproxy,
-		help.HelpImportPath,
 		modload.HelpModules,
 		modget.HelpModuleGet,
 		help.HelpPackages,
-		test.HelpTestflag,
-		test.HelpTestfunc,
 	}
 }
 
