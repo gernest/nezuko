@@ -21,14 +21,12 @@ import (
 	"github.com/gernest/nezuko/internal/modfetch"
 	"github.com/gernest/nezuko/internal/modget"
 	"github.com/gernest/nezuko/internal/modload"
-	"github.com/gernest/nezuko/internal/version"
 )
 
 func init() {
 	base.Go.Commands = []*base.Command{
 		modget.CmdGet,
 		modcmd.CmdMod,
-		version.CmdVersion,
 
 		modfetch.HelpGoproxy,
 		modload.HelpModules,
