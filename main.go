@@ -15,7 +15,6 @@ import (
 
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
-	"github.com/gernest/nezuko/internal/envcmd"
 	"github.com/gernest/nezuko/internal/help"
 	"github.com/gernest/nezuko/internal/modcmd"
 	"github.com/gernest/nezuko/internal/modfetch"
@@ -52,12 +51,6 @@ func main() {
 	}
 
 	cfg.OrigEnv = os.Environ()
-	cfg.CmdEnv = envcmd.MkEnv()
-	for _, env := range cfg.CmdEnv {
-		if os.Getenv(env.Name) != env.Value {
-			os.Setenv(env.Name, env.Value)
-		}
-	}
 
 BigCmdLoop:
 	for bigCmd := base.Go; ; {
