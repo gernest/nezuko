@@ -11,16 +11,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 
-	
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/envcmd"
 	"github.com/gernest/nezuko/internal/help"
-	"github.com/gernest/nezuko/internal/list"
 	"github.com/gernest/nezuko/internal/modcmd"
 	"github.com/gernest/nezuko/internal/modfetch"
 	"github.com/gernest/nezuko/internal/modget"
@@ -30,9 +26,7 @@ import (
 
 func init() {
 	base.Go.Commands = []*base.Command{
-		envcmd.CmdEnv,
 		modget.CmdGet,
-		list.CmdList,
 		modcmd.CmdMod,
 		version.CmdVersion,
 
@@ -59,42 +53,6 @@ func main() {
 		return
 	}
 
-	// Diagnose common mistake: GOPATH==GOROOT.
-	// This setting is equivalent to not setting GOPATH at all,
-	// which is not what most people want when they do it.
-	if gopath := cfg.BuildContext.GOPATH; filepath.Clean(gopath) == filepath.Clean(runtime.GOROOT()) {
-		fmt.Fprintf(os.Stderr, "warning: GOPATH set to GOROOT (%s) has no effect\n", gopath)
-	} else {
-		for _, p := range filepath.SplitList(gopath) {
-			// Some GOPATHs have empty directory elements - ignore them.
-			// See issue 21928 for details.
-			if p == "" {
-				continue
-			}
-			// Note: using HasPrefix instead of Contains because a ~ can appear
-			// in the middle of directory elements, such as /tmp/git-1.8.2~rc3
-			// or C:\PROGRA~1. Only ~ as a path prefix has meaning to the shell.
-			if strings.HasPrefix(p, "~") {
-				fmt.Fprintf(os.Stderr, "go: GOPATH entry cannot start with shell metacharacter '~': %q\n", p)
-				os.Exit(2)
-			}
-			if !filepath.IsAbs(p) {
-				fmt.Fprintf(os.Stderr, "go: GOPATH entry is relative; must be absolute path: %q.\nFor more details see: 'go help gopath'\n", p)
-				os.Exit(2)
-			}
-		}
-	}
-
-	if fi, err := os.Stat(cfg.GOROOT); err != nil || !fi.IsDir() {
-		fmt.Fprintf(os.Stderr, "go: cannot find GOROOT directory: %v\n", cfg.GOROOT)
-		os.Exit(2)
-	}
-
-	// Set environment (GOOS, GOARCH, etc) explicitly.
-	// In theory all the commands we invoke should have
-	// the same default computation of these as we do,
-	// but in practice there might be skew
-	// This makes sure we all agree.
 	cfg.OrigEnv = os.Environ()
 	cfg.CmdEnv = envcmd.MkEnv()
 	for _, env := range cfg.CmdEnv {

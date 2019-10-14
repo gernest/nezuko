@@ -70,7 +70,9 @@ var CmdEnv []EnvVar
 
 // Global build parameters (used during package load)
 var (
-	Goarch    = BuildContext.GOARCH
+	Goarch = BuildContext.GOARCH
+	// path to zig binary
+	ZigPath   string
 	Goos      = BuildContext.GOOS
 	ExeSuffix string
 	Gopath    = filepath.SplitList(BuildContext.GOPATH)

@@ -19,8 +19,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gernest/nezuko/internal/buildid"
 	"github.com/gernest/nezuko/internal/base"
+	"github.com/gernest/nezuko/internal/buildid"
 	"github.com/gernest/nezuko/internal/cache"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/load"
@@ -224,15 +224,15 @@ func (b *Builder) Init() {
 	if cfg.BuildN {
 		b.WorkDir = "$WORK"
 	} else {
-		tmp, err := ioutil.TempDir(os.Getenv("GOTMPDIR"), "go-build")
+		tmp, err := ioutil.TempDir(os.Getenv("GOTMPDIR"), "z-build")
 		if err != nil {
-			base.Fatalf("go: creating work dir: %v", err)
+			base.Fatalf("z: creating work dir: %v", err)
 		}
 		if !filepath.IsAbs(tmp) {
 			abs, err := filepath.Abs(tmp)
 			if err != nil {
 				os.RemoveAll(tmp)
-				base.Fatalf("go: creating work dir: %v", err)
+				base.Fatalf("z: creating work dir: %v", err)
 			}
 			tmp = abs
 		}
