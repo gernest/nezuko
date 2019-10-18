@@ -7,6 +7,11 @@ package modget
 
 import (
 	"fmt"
+	"os"
+	pathpkg "path"
+	"path/filepath"
+	"strings"
+
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/get"
@@ -20,16 +25,12 @@ import (
 	"github.com/gernest/nezuko/internal/semver"
 	"github.com/gernest/nezuko/internal/str"
 	"github.com/gernest/nezuko/internal/work"
-	"os"
-	pathpkg "path"
-	"path/filepath"
-	"strings"
 )
 
 var CmdGet = &base.Command{
 	// Note: -d -m -u are listed explicitly because they are the most common get flags.
 	// Do not send CLs removing them because they're covered by [get flags].
-	UsageLine: "go get [-d] [-m] [-u] [-v] [-insecure] [build flags] [packages]",
+	UsageLine: "z get [-d] [-m] [-u] [-v] [-insecure] [build flags] [packages]",
 	Short:     "add dependencies to current module and install them",
 	Long: `
 Get resolves and adds dependencies to the current development module
@@ -199,7 +200,7 @@ func runGet(cmd *base.Command, args []string) {
 	case "", "patch", "true":
 		// ok
 	default:
-		base.Fatalf("go get: unknown upgrade flag -u=%s", getU)
+		base.Fatalf("z get: unknown upgrade flag -u=%s", getU)
 	}
 	if *getF {
 		fmt.Fprintf(os.Stderr, "go get: -f flag is a no-op when using modules\n")
