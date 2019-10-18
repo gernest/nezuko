@@ -93,7 +93,7 @@ BigCmdLoop:
 		if i := strings.LastIndex(cfg.CmdName, " "); i >= 0 {
 			helpArg = " " + cfg.CmdName[:i]
 		}
-		fmt.Fprintf(os.Stderr, "go %s: unknown command\nRun 'go help%s' for usage.\n", cfg.CmdName, helpArg)
+		fmt.Fprintf(os.Stderr, "z %s: unknown command\nRun 'go help%s' for usage.\n", cfg.CmdName, helpArg)
 		base.SetExitStatus(2)
 		base.Exit()
 	}
