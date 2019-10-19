@@ -6,8 +6,6 @@ package search
 
 import (
 	"fmt"
-	"github.com/gernest/nezuko/internal/base"
-	"github.com/gernest/nezuko/internal/cfg"
 	"go/build"
 	"log"
 	"os"
@@ -15,6 +13,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/gernest/nezuko/internal/base"
+	"github.com/gernest/nezuko/internal/cfg"
 )
 
 // A Match represents the result of matching a single package pattern.
@@ -32,89 +33,6 @@ func MatchPackages(pattern string) *Match {
 	m := &Match{
 		Pattern: pattern,
 		Literal: false,
-	}
-	match := func(string) bool { return true }
-	treeCanMatch := func(string) bool { return true }
-	if !IsMetaPackage(pattern) {
-		match = MatchPattern(pattern)
-		treeCanMatch = TreeCanMatchPattern(pattern)
-	}
-
-	have := map[string]bool{
-		"builtin": true, // ignore pseudo-package that exists only for documentation
-	}
-	if !cfg.BuildContext.CgoEnabled {
-		have["runtime/cgo"] = true // ignore during walk
-	}
-
-	for _, src := range cfg.BuildContext.SrcDirs() {
-		if (pattern == "std" || pattern == "cmd") && src != cfg.GOROOTsrc {
-			continue
-		}
-		src = filepath.Clean(src) + string(filepath.Separator)
-		root := src
-		if pattern == "cmd" {
-			root += "cmd" + string(filepath.Separator)
-		}
-		filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
-			if err != nil || path == src {
-				return nil
-			}
-
-			want := true
-			// Avoid .foo, _foo, and testdata directory trees.
-			_, elem := filepath.Split(path)
-			if strings.HasPrefix(elem, ".") || strings.HasPrefix(elem, "_") || elem == "testdata" {
-				want = false
-			}
-
-			name := filepath.ToSlash(path[len(src):])
-			if pattern == "std" && (!IsStandardImportPath(name) || name == "cmd") {
-				// The name "std" is only the standard library.
-				// If the name is cmd, it's the root of the command tree.
-				want = false
-			}
-			if !treeCanMatch(name) {
-				want = false
-			}
-
-			if !fi.IsDir() {
-				if fi.Mode()&os.ModeSymlink != 0 && want {
-					if target, err := os.Stat(path); err == nil && target.IsDir() {
-						fmt.Fprintf(os.Stderr, "warning: ignoring symlink %s\n", path)
-					}
-				}
-				return nil
-			}
-			if !want {
-				return filepath.SkipDir
-			}
-
-			if have[name] {
-				return nil
-			}
-			have[name] = true
-			if !match(name) {
-				return nil
-			}
-			pkg, err := cfg.BuildContext.ImportDir(path, 0)
-			if err != nil {
-				if _, noGo := err.(*build.NoGoError); noGo {
-					return nil
-				}
-			}
-
-			// If we are expanding "cmd", skip main
-			// packages under cmd/vendor. At least as of
-			// March, 2017, there is one there for the
-			// vendored pprof tool.
-			if pattern == "cmd" && strings.HasPrefix(pkg.ImportPath, "cmd/vendor") && pkg.Name == "main" {
-				return nil
-			}
-
-			m.Pkgs = append(m.Pkgs, name)
-			return nil
-		})
 	}
 	return m
 }
@@ -206,10 +124,8 @@ func MatchPackagesInFS(pattern string) *Match {
 		// as not matching the pattern. Go 1.5 and earlier skipped, but that
 		// behavior means people miss serious mistakes.
 		// See golang.org/issue/11407.
-		if p, err := cfg.BuildContext.ImportDir(path, 0); err != nil && (p == nil || len(p.InvalidGoFiles) == 0) {
-			if _, noGo := err.(*build.NoGoError); !noGo {
-				log.Print(err)
-			}
+		if _, err := cfg.BuildContext.ImportDir(path, 0); err != nil {
+			log.Print(err)
 			return nil
 		}
 		m.Pkgs = append(m.Pkgs, name)

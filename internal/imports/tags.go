@@ -4,8 +4,6 @@
 
 package imports
 
-import "github.com/gernest/nezuko/internal/cfg"
-
 var tags map[string]bool
 
 func Tags() map[string]bool {
@@ -16,19 +14,5 @@ func Tags() map[string]bool {
 }
 
 func loadTags() map[string]bool {
-	tags := map[string]bool{
-		cfg.BuildContext.GOOS:     true,
-		cfg.BuildContext.GOARCH:   true,
-		cfg.BuildContext.Compiler: true,
-	}
-	if cfg.BuildContext.CgoEnabled {
-		tags["cgo"] = true
-	}
-	for _, tag := range cfg.BuildContext.BuildTags {
-		tags[tag] = true
-	}
-	for _, tag := range cfg.BuildContext.ReleaseTags {
-		tags[tag] = true
-	}
-	return tags
+	return map[string]bool{}
 }

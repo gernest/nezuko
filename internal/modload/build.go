@@ -15,11 +15,9 @@ import (
 
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
-	"github.com/gernest/nezuko/internal/goroot"
 	"github.com/gernest/nezuko/internal/modfetch"
 	"github.com/gernest/nezuko/internal/modinfo"
 	"github.com/gernest/nezuko/internal/module"
-	"github.com/gernest/nezuko/internal/search"
 )
 
 var (
@@ -35,14 +33,7 @@ func findStandardImportPath(path string) string {
 	if path == "" {
 		panic("findStandardImportPath called with empty path")
 	}
-	if search.IsStandardImportPath(path) {
-		if goroot.IsStandardPackage(cfg.GOROOT, cfg.BuildContext.Compiler, path) {
-			return filepath.Join(cfg.GOROOT, "src", path)
-		}
-		if goroot.IsStandardPackage(cfg.GOROOT, cfg.BuildContext.Compiler, "vendor/"+path) {
-			return filepath.Join(cfg.GOROOT, "src/vendor", path)
-		}
-	}
+	//TODO(gernest) find std import
 	return ""
 }
 

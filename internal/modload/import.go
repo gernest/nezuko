@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gernest/nezuko/internal/goroot"
 	"go/build"
 	"os"
 	"path/filepath"
@@ -21,7 +20,6 @@ import (
 	"github.com/gernest/nezuko/internal/modfetch/codehost"
 	"github.com/gernest/nezuko/internal/module"
 	"github.com/gernest/nezuko/internal/par"
-	"github.com/gernest/nezuko/internal/search"
 	"github.com/gernest/nezuko/internal/semver"
 )
 
@@ -54,18 +52,6 @@ func Import(path string) (m module.Version, dir string, err error) {
 	}
 	if build.IsLocalImport(path) {
 		return module.Version{}, "", fmt.Errorf("relative import not supported")
-	}
-	if path == "C" || path == "unsafe" {
-		// There's no directory for import "C" or import "unsafe".
-		return module.Version{}, "", nil
-	}
-
-	// Is the package in the standard library?
-	if search.IsStandardImportPath(path) {
-		if goroot.IsStandardPackage(cfg.GOROOT, cfg.BuildContext.Compiler, path) {
-			dir := filepath.Join(cfg.GOROOT, "src", path)
-			return module.Version{}, dir, nil
-		}
 	}
 
 	// -mod=vendor is special.

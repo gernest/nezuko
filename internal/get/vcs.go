@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gernest/nezuko/internal/singleflight"
 	"log"
 	"net/url"
 	"os"
@@ -18,9 +17,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gernest/nezuko/internal/singleflight"
+
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/web"
+)
+
+var (
+	Insecure bool
 )
 
 // A vcsCmd describes how to use a version control system

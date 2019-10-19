@@ -15,15 +15,12 @@ import (
 )
 
 var cmdInit = &base.Command{
-	UsageLine: "go mod init [module]",
+	UsageLine: "z mod init [module]",
 	Short:     "initialize new module in current directory",
 	Long: `
-Init initializes and writes a new go.mod to the current directory,
+Init initializes and writes a new z.mod to the current directory,
 in effect creating a new module rooted at the current directory.
-The file go.mod must not already exist.
-If possible, init will guess the module path from import comments
-(see 'go help importpath') or from version control configuration.
-To override this guess, supply the module path as an argument.
+The file z.mod must not already exist.
 	`,
 	Run: runInit,
 }
@@ -31,7 +28,7 @@ To override this guess, supply the module path as an argument.
 func runInit(cmd *base.Command, args []string) {
 	modload.CmdModInit = true
 	if len(args) > 1 {
-		base.Fatalf("go mod init: too many arguments")
+		base.Fatalf("z mod init: too many arguments")
 	}
 	if len(args) == 1 {
 		modload.CmdModModule = args[0]

@@ -24,7 +24,6 @@ import (
 	"github.com/gernest/nezuko/internal/search"
 	"github.com/gernest/nezuko/internal/semver"
 	"github.com/gernest/nezuko/internal/str"
-	"github.com/gernest/nezuko/internal/work"
 )
 
 var CmdGet = &base.Command{
@@ -173,7 +172,6 @@ func (v *upgradeFlag) Set(s string) error {
 func (v *upgradeFlag) String() string { return "" }
 
 func init() {
-	work.AddBuildFlags(CmdGet)
 	CmdGet.Run = runGet // break init loop
 	CmdGet.Flag.BoolVar(&get.Insecure, "insecure", get.Insecure, "")
 	CmdGet.Flag.Var(&getU, "u", "")
@@ -520,7 +518,7 @@ func runGet(cmd *base.Command, args []string) {
 		// All requested versions were explicitly @none.
 		// Note that 'go get -u' without any arguments results in len(install) == 1:
 		// search.CleanImportPaths returns "." for empty args.
-		work.BuildInit()
+		// TODO(gernest): BuildInit()
 		pkgs := load.PackagesAndErrors(install)
 		var todo []*load.Package
 		for _, p := range pkgs {
@@ -546,7 +544,7 @@ func runGet(cmd *base.Command, args []string) {
 		// (The load.PackagesAndErrors is what did the download
 		// of the named packages and their dependencies.)
 		if len(todo) > 0 && !*getD {
-			work.InstallPackages(install, todo)
+			//TODO(gernest): install packages
 		}
 	}
 }

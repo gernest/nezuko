@@ -41,7 +41,7 @@ func initDefaultCache() {
 		if defaultDirErr != nil {
 			base.Fatalf("build cache is required, but could not be located: %v", defaultDirErr)
 		}
-		base.Fatalf("build cache is disabled by GOCACHE=off, but required as of Go 1.12")
+		base.Fatalf("build cache is disabled by ZIGCACHE=off, but required as of Go 1.12")
 	}
 	if err := os.MkdirAll(dir, 0777); err != nil {
 		base.Fatalf("failed to initialize build cache at %s: %s\n", dir, err)
@@ -64,7 +64,7 @@ var (
 	defaultDirErr  error
 )
 
-// DefaultDir returns the effective GOCACHE setting.
+// DefaultDir returns the effective ZIGCACHE setting.
 // It returns "off" if the cache is disabled.
 func DefaultDir() string {
 	// Save the result of the first call to DefaultDir for later use in
@@ -73,13 +73,13 @@ func DefaultDir() string {
 	// otherwise distinguish between an explicit "off" and a UserCacheDir error.
 
 	defaultDirOnce.Do(func() {
-		defaultDir = os.Getenv("GOCACHE")
+		defaultDir = os.Getenv("ZIGCACHE")
 		if filepath.IsAbs(defaultDir) || defaultDir == "off" {
 			return
 		}
 		if defaultDir != "" {
 			defaultDir = "off"
-			defaultDirErr = fmt.Errorf("GOCACHE is not an absolute path")
+			defaultDirErr = fmt.Errorf("ZIGCACHE is not an absolute path")
 			return
 		}
 
@@ -87,10 +87,10 @@ func DefaultDir() string {
 		dir, err := os.UserCacheDir()
 		if err != nil {
 			defaultDir = "off"
-			defaultDirErr = fmt.Errorf("GOCACHE is not defined and %v", err)
+			defaultDirErr = fmt.Errorf("ZIGCACHE is not defined and %v", err)
 			return
 		}
-		defaultDir = filepath.Join(dir, "go-build")
+		defaultDir = filepath.Join(dir, "z-build")
 	})
 
 	return defaultDir

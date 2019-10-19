@@ -122,7 +122,7 @@ func Init() {
 	}
 
 	if CmdModInit {
-		// Running 'z mod init': go.mod will be created in current directory.
+		// Running 'z mod init': z.mod will be created in current directory.
 		modRoot = cwd
 	} else {
 		modRoot, _ = FindModuleRoot(cwd, "", true)
@@ -146,9 +146,9 @@ func Init() {
 		base.Fatalf("z: cannot use modules with build cache disabled")
 	}
 
-	list := filepath.SplitList(cfg.BuildContext.GOPATH)
+	list := filepath.SplitList(cfg.BuildContext.ZIGPATH)
 	if len(list) == 0 || list[0] == "" {
-		base.Fatalf("missing $GOPATH")
+		base.Fatalf("missing $ZIGPATH")
 	}
 	gopath = list[0]
 	if _, err := os.Stat(filepath.Join(gopath, "go.mod")); err == nil {
@@ -211,7 +211,7 @@ func init() {
 	load.ModInit = Init
 
 	// Set modfetch.PkgMod unconditionally, so that go clean -modcache can run even without modules enabled.
-	if list := filepath.SplitList(cfg.BuildContext.GOPATH); len(list) > 0 && list[0] != "" {
+	if list := filepath.SplitList(cfg.BuildContext.ZIGPATH); len(list) > 0 && list[0] != "" {
 		modfetch.PkgMod = filepath.Join(list[0], "pkg/mod")
 	}
 }
@@ -377,13 +377,12 @@ var altConfigs = []string{
 // Exported only for testing.
 func FindModuleRoot(dir, limit string, legacyConfigOK bool) (root, file string) {
 	dir = filepath.Clean(dir)
-	dir1 := dir
 	limit = filepath.Clean(limit)
 
-	// Look for enclosing go.mod.
+	// Look for enclosing z.mod.
 	for {
-		if fi, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil && !fi.IsDir() {
-			return dir, "go.mod"
+		if fi, err := os.Stat(filepath.Join(dir, "z.mod")); err == nil && !fi.IsDir() {
+			return dir, "z.mod"
 		}
 		if dir == limit {
 			break
@@ -394,27 +393,6 @@ func FindModuleRoot(dir, limit string, legacyConfigOK bool) (root, file string) 
 		}
 		dir = d
 	}
-
-	// Failing that, look for enclosing alternate version config.
-	if legacyConfigOK {
-		dir = dir1
-		for {
-			for _, name := range altConfigs {
-				if fi, err := os.Stat(filepath.Join(dir, name)); err == nil && !fi.IsDir() {
-					return dir, name
-				}
-			}
-			if dir == limit {
-				break
-			}
-			d := filepath.Dir(dir)
-			if d == dir {
-				break
-			}
-			dir = d
-		}
-	}
-
 	return "", ""
 }
 
@@ -465,7 +443,7 @@ func FindModulePath(dir string) (string, error) {
 	}
 
 	// Look for path in GOPATH.
-	for _, gpdir := range filepath.SplitList(cfg.BuildContext.GOPATH) {
+	for _, gpdir := range filepath.SplitList(cfg.BuildContext.ZIGPATH) {
 		if gpdir == "" {
 			continue
 		}

@@ -26,7 +26,6 @@ func init() {
 	base.Go.Commands = []*base.Command{
 		modget.CmdGet,
 		modcmd.CmdMod,
-
 		modfetch.HelpGoproxy,
 		modload.HelpModules,
 		modget.HelpModuleGet,

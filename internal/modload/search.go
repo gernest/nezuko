@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/gernest/nezuko/internal/base"
-	"github.com/gernest/nezuko/internal/cfg"
 	"github.com/gernest/nezuko/internal/imports"
 	"github.com/gernest/nezuko/internal/module"
 	"github.com/gernest/nezuko/internal/search"
@@ -30,17 +29,11 @@ func matchPackages(pattern string, tags map[string]bool, useStd bool, modules []
 	have := map[string]bool{
 		"builtin": true, // ignore pseudo-package that exists only for documentation
 	}
-	if !cfg.BuildContext.CgoEnabled {
-		have["runtime/cgo"] = true // ignore during walk
-	}
 	var pkgs []string
 
 	walkPkgs := func(root, importPathRoot string) {
 		root = filepath.Clean(root)
 		var cmd string
-		if root == cfg.GOROOTsrc {
-			cmd = filepath.Join(root, "cmd")
-		}
 		filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
 			if err != nil {
 				return nil
@@ -106,10 +99,6 @@ func matchPackages(pattern string, tags map[string]bool, useStd bool, modules []
 			}
 			return nil
 		})
-	}
-
-	if useStd {
-		walkPkgs(cfg.GOROOTsrc, "")
 	}
 
 	for _, mod := range modules {
