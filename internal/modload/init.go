@@ -47,14 +47,14 @@ var (
 	CmdModModule string // module argument for 'go mod init'
 )
 
-// ModFile returns the parsed go.mod file.
+// ModFile returns the parsed z.mod file.
 //
 // Note that after calling ImportPaths or LoadBuildList,
 // the require statements in the modfile.File are no longer
 // the source of truth and will be ignored: edits made directly
 // will be lost at the next call to WriteGoMod.
 // To make permanent changes to the require statements
-// in go.mod, edit it before calling ImportPaths or LoadBuildList.
+// in z.mod, edit it before calling ImportPaths or LoadBuildList.
 func ModFile() *modfile.File {
 	Init()
 	if modFile == nil {
@@ -70,7 +70,7 @@ func BinDir() string {
 
 // mustUseModules reports whether we are invoked as vgo
 // (as opposed to go).
-// If so, we only support builds with go.mod files.
+// If so, we only support builds with z.mod files.
 func mustUseModules() bool {
 	name := os.Args[0]
 	name = name[strings.LastIndex(name, "/")+1:]
@@ -128,7 +128,7 @@ func Init() {
 		modRoot, _ = FindModuleRoot(cwd, "", true)
 		if modRoot == "" {
 		} else if search.InDir(modRoot, os.TempDir()) == "." {
-			// If you create /tmp/go.mod for experimenting,
+			// If you create /tmp/z.mod for experimenting,
 			// then any tests that create work directories under /tmp
 			// will find it and get modules when they're not expecting them.
 			// It's a bit of a peculiar thing to disallow but quite mysterious
@@ -151,8 +151,8 @@ func Init() {
 		base.Fatalf("missing $ZIGPATH")
 	}
 	gopath = list[0]
-	if _, err := os.Stat(filepath.Join(gopath, "go.mod")); err == nil {
-		base.Fatalf("$GOPATH/go.mod exists but should not")
+	if _, err := os.Stat(filepath.Join(gopath, "z.mod")); err == nil {
+		base.Fatalf("$GOPATH/z.mod exists but should not")
 	}
 
 	oldSrcMod := filepath.Join(list[0], "src/mod")
@@ -247,7 +247,7 @@ func die() {
 }
 
 // InitMod sets Target and, if there is a main module, parses the initial build
-// list from its go.mod file, creating and populating that file if needed.
+// list from its z.mod file, creating and populating that file if needed.
 func InitMod() {
 	if len(buildList) > 0 {
 		return
@@ -283,7 +283,7 @@ func InitMod() {
 	f, err := modfile.Parse(gomod, data, fixVersion)
 	if err != nil {
 		// Errors returned by modfile.Parse begin with file:line.
-		base.Fatalf("z: errors parsing go.mod:\n%s\n", err)
+		base.Fatalf("z: errors parsing z.mod:\n%s\n", err)
 	}
 	modFile = f
 	modFileData = data
@@ -321,7 +321,7 @@ func modFileToBuildList() {
 	buildList = list
 }
 
-// Allowed reports whether module m is allowed (not excluded) by the main module's go.mod.
+// Allowed reports whether module m is allowed (not excluded) by the main module's z.mod.
 func Allowed(m module.Version) bool {
 	return !excluded[m]
 }
@@ -330,9 +330,9 @@ func legacyModInit() {
 	if modFile == nil {
 		path, err := FindModulePath(modRoot)
 		if err != nil {
-			base.Fatalf("go: %v", err)
+			base.Fatalf("z: %v", err)
 		}
-		fmt.Fprintf(os.Stderr, "go: creating new go.mod: module %s\n", path)
+		fmt.Fprintf(os.Stderr, "z: creating new z.mod: module %s\n", path)
 		modFile = new(modfile.File)
 		modFile.AddModuleStmt(path)
 	}
@@ -352,26 +352,11 @@ func addGoStmt() {
 	tags := build.Default.ReleaseTags
 	version := tags[len(tags)-1]
 	if !strings.HasPrefix(version, "go") || !modfile.GoVersionRE.MatchString(version[2:]) {
-		base.Fatalf("go: unrecognized default version %q", version)
+		base.Fatalf("z: unrecognized default version %q", version)
 	}
 	if err := modFile.AddGoStmt(version[2:]); err != nil {
-		base.Fatalf("go: internal error: %v", err)
+		base.Fatalf("z: internal error: %v", err)
 	}
-}
-
-var altConfigs = []string{
-	"Gopkg.lock",
-
-	"GLOCKFILE",
-	"Godeps/Godeps.json",
-	"dependencies.tsv",
-	"glide.lock",
-	"vendor.conf",
-	"vendor.yml",
-	"vendor/manifest",
-	"vendor/vendor.json",
-
-	".git/config",
 }
 
 // Exported only for testing.
@@ -490,7 +475,7 @@ func DisallowWriteGoMod() {
 }
 
 // AllowWriteGoMod undoes the effect of DisallowWriteGoMod:
-// future calls to WriteGoMod will update go.mod if needed.
+// future calls to WriteGoMod will update z.mod if needed.
 // Note that any past calls have been discarded, so typically
 // a call to AlowWriteGoMod should be followed by a call to WriteGoMod.
 func AllowWriteGoMod() {
@@ -498,7 +483,7 @@ func AllowWriteGoMod() {
 }
 
 // MinReqs returns a Reqs with minimal dependencies of Target,
-// as will be written to go.mod.
+// as will be written to z.mod.
 func MinReqs() mvs.Reqs {
 	var direct []string
 	for _, m := range buildList[1:] {
@@ -508,21 +493,21 @@ func MinReqs() mvs.Reqs {
 	}
 	min, err := mvs.Req(Target, buildList, direct, Reqs())
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 	return &mvsReqs{buildList: append([]module.Version{Target}, min...)}
 }
 
-// WriteGoMod writes the current build list back to go.mod.
+// WriteGoMod writes the current build list back to z.mod.
 func WriteGoMod() {
 	// If we're using -mod=vendor we basically ignored
-	// go.mod, so definitely don't try to write back our
+	// z.mod, so definitely don't try to write back our
 	// incomplete view of the world.
 	if !allowWriteGoMod || cfg.BuildMod == "vendor" {
 		return
 	}
 
-	// If we aren't in a module, we don't have anywhere to write a go.mod file.
+	// If we aren't in a module, we don't have anywhere to write a z.mod file.
 	if modRoot == "" {
 		return
 	}
@@ -549,45 +534,45 @@ func WriteGoMod() {
 		base.Fatalf("z: %v", err)
 	}
 
-	// Always update go.sum, even if we didn't change go.mod: we may have
+	// Always update go.sum, even if we didn't change z.mod: we may have
 	// downloaded modules that we didn't have before.
 	modfetch.WriteZigSum()
 
 	if bytes.Equal(new, modFileData) {
-		// We don't need to modify go.mod from what we read previously.
+		// We don't need to modify z.mod from what we read previously.
 		// Ignore any intervening edits.
 		return
 	}
 	if cfg.BuildMod == "readonly" {
-		base.Fatalf("go: updates to go.mod needed, disabled by -mod=readonly")
+		base.Fatalf("z: updates to z.mod needed, disabled by -mod=readonly")
 	}
 
 	unlock := modfetch.SideLock()
 	defer unlock()
 
-	file := filepath.Join(modRoot, "go.mod")
+	file := filepath.Join(modRoot, "z.mod")
 	old, err := ioutil.ReadFile(file)
 	if !bytes.Equal(old, modFileData) {
 		if bytes.Equal(old, new) {
-			// Some other process wrote the same go.mod file that we were about to write.
+			// Some other process wrote the same z.mod file that we were about to write.
 			modFileData = new
 			return
 		}
 		if err != nil {
-			base.Fatalf("go: can't determine whether go.mod has changed: %v", err)
+			base.Fatalf("z: can't determine whether z.mod has changed: %v", err)
 		}
-		// The contents of the go.mod file have changed. In theory we could add all
+		// The contents of the z.mod file have changed. In theory we could add all
 		// of the new modules to the build list, recompute, and check whether any
 		// module in *our* build list got bumped to a different version, but that's
 		// a lot of work for marginal benefit. Instead, fail the command: if users
 		// want to run concurrent commands, they need to start with a complete,
 		// consistent module definition.
-		base.Fatalf("go: updates to go.mod needed, but contents have changed")
+		base.Fatalf("z: updates to z.mod needed, but contents have changed")
 
 	}
 
 	if err := renameio.WriteFile(file, new); err != nil {
-		base.Fatalf("error writing go.mod: %v", err)
+		base.Fatalf("error writing z.mod: %v", err)
 	}
 	modFileData = new
 }
@@ -599,7 +584,7 @@ func fixVersion(path, vers string) (string, error) {
 	}
 
 	// fixVersion is called speculatively on every
-	// module, version pair from every go.mod file.
+	// module, version pair from every z.mod file.
 	// Avoid the query if it looks OK.
 	_, pathMajor, ok := module.SplitPathVersion(path)
 	if !ok {
