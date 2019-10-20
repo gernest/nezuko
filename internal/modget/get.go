@@ -7,7 +7,6 @@ package modget
 
 import (
 	"fmt"
-	"os"
 	pathpkg "path"
 	"path/filepath"
 	"strings"
@@ -146,12 +145,9 @@ Usage: ` + CmdGet.UsageLine + `
 }
 
 var (
-	getD   = CmdGet.Flag.Bool("d", false, "")
-	getF   = CmdGet.Flag.Bool("f", false, "")
-	getFix = CmdGet.Flag.Bool("fix", false, "")
-	getM   = CmdGet.Flag.Bool("m", false, "")
-	getT   = CmdGet.Flag.Bool("t", false, "")
-	getU   upgradeFlag
+	getD = CmdGet.Flag.Bool("d", false, "")
+	getM = CmdGet.Flag.Bool("m", false, "")
+	getU upgradeFlag
 	// -insecure is get.Insecure
 	// -v is cfg.BuildV
 )
@@ -199,19 +195,6 @@ func runGet(cmd *base.Command, args []string) {
 		// ok
 	default:
 		base.Fatalf("z get: unknown upgrade flag -u=%s", getU)
-	}
-	if *getF {
-		fmt.Fprintf(os.Stderr, "go get: -f flag is a no-op when using modules\n")
-	}
-	if *getFix {
-		fmt.Fprintf(os.Stderr, "go get: -fix flag is a no-op when using modules\n")
-	}
-	if *getT {
-		fmt.Fprintf(os.Stderr, "go get: -t flag is a no-op when using modules\n")
-	}
-
-	if cfg.BuildMod == "vendor" {
-		base.Fatalf("go get: disabled by -mod=%s", cfg.BuildMod)
 	}
 
 	modload.LoadBuildList()
