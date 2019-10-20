@@ -22,7 +22,7 @@ import (
 // A File is the parsed, interpreted form of a go.mod file.
 type File struct {
 	Module  *Module
-	Go      *Go
+	Exports *Exports
 	Require []*Require
 	Exclude []*Exclude
 	Replace []*Replace
@@ -40,6 +40,12 @@ type Module struct {
 type Go struct {
 	Version string // "1.23"
 	Syntax  *Line
+}
+
+// Exports exports is the exports statement
+type Exports struct {
+	Name   string
+	Syntax *Line
 }
 
 // A Require is a single require statement.
@@ -176,8 +182,8 @@ func (f *File) add(errs *bytes.Buffer, line *Line, verb string, args []string, f
 	default:
 		fmt.Fprintf(errs, "%s:%d: unknown directive: %s\n", f.Syntax.Name, line.Start.Line, verb)
 
-	case "go":
-		if f.Go != nil {
+	case "exports":
+		if f.Exports != nil {
 			fmt.Fprintf(errs, "%s:%d: repeated go statement\n", f.Syntax.Name, line.Start.Line)
 			return
 		}
@@ -185,8 +191,8 @@ func (f *File) add(errs *bytes.Buffer, line *Line, verb string, args []string, f
 			fmt.Fprintf(errs, "%s:%d: usage: go 1.23\n", f.Syntax.Name, line.Start.Line)
 			return
 		}
-		f.Go = &Go{Syntax: line}
-		f.Go.Version = args[0]
+		f.Exports = &Exports{Syntax: line}
+		f.Exports.Name = args[0]
 	case "module":
 		if f.Module != nil {
 			fmt.Fprintf(errs, "%s:%d: repeated module statement\n", f.Syntax.Name, line.Start.Line)
@@ -477,18 +483,22 @@ func (f *File) Cleanup() {
 	f.Syntax.Cleanup()
 }
 
-func (f *File) AddGoStmt(version string) error {
-	if !GoVersionRE.MatchString(version) {
-		return fmt.Errorf("invalid language version string %q", version)
+func IsValidExport(name string) bool {
+	return name != ""
+}
+
+func (f *File) AddExportsStmt(name string) error {
+	if !IsValidExport(name) {
+		return fmt.Errorf("invalid module  exports string %q", name)
 	}
-	if f.Go == nil {
-		f.Go = &Go{
-			Version: version,
-			Syntax:  f.Syntax.addLine(nil, "go", version),
+	if f.Exports == nil {
+		f.Exports = &Exports{
+			Name:   name,
+			Syntax: f.Syntax.addLine(nil, "exports", name),
 		}
 	} else {
-		f.Go.Version = version
-		f.Syntax.updateLine(f.Go.Syntax, "go", version)
+		f.Exports.Name = name
+		f.Syntax.updateLine(f.Exports.Syntax, "exports", name)
 	}
 	return nil
 }

@@ -444,8 +444,8 @@ type loader struct {
 	pkgCache *par.Cache // map from string to *loadPkg
 
 	// computed at end of iterations
-	direct    map[string]bool   // imported directly by main module
-	goVersion map[string]string // go version recorded in each module
+	direct  map[string]bool // imported directly by main module
+	exports map[string]string
 }
 
 // LoadTests controls whether the loaders load tests of the root packages.
@@ -551,10 +551,10 @@ func (ld *loader) load(roots func() []string) {
 	}
 
 	// Add Go versions, computed during walk.
-	ld.goVersion = make(map[string]string)
+	ld.exports = make(map[string]string)
 	for _, m := range buildList {
-		v, _ := reqs.(*mvsReqs).versions.Load(m)
-		ld.goVersion[m.Path], _ = v.(string)
+		v, _ := reqs.(*mvsReqs).exports.Load(m)
+		ld.exports[m.Path], _ = v.(string)
 	}
 
 	// Mix in direct markings (really, lack of indirect markings)
@@ -830,7 +830,7 @@ func Replacement(mod module.Version) module.Version {
 type mvsReqs struct {
 	buildList []module.Version
 	cache     par.Cache
-	versions  sync.Map
+	exports   sync.Map
 }
 
 // Reqs returns the current module requirement graph.
@@ -916,8 +916,8 @@ func (r *mvsReqs) modFileToList(f *modfile.File) []module.Version {
 
 func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 	if mod == Target {
-		if modFile != nil && modFile.Go != nil {
-			r.versions.LoadOrStore(mod, modFile.Go.Version)
+		if modFile != nil && modFile.Exports != nil {
+			r.exports.LoadOrStore(mod, modFile.Exports.Name)
 		}
 		var list []module.Version
 		return append(list, r.buildList[1:]...), nil
@@ -949,8 +949,8 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 				base.Errorf("go: parsing %s: %v", base.ShortPath(gomod), err)
 				return nil, ErrRequire
 			}
-			if f.Go != nil {
-				r.versions.LoadOrStore(mod, f.Go.Version)
+			if f.Exports != nil {
+				r.exports.LoadOrStore(mod, f.Exports.Name)
 			}
 			return r.modFileToList(f), nil
 		}
@@ -985,8 +985,8 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 		base.Errorf("go: %s@%s: parsing go.mod: unexpected module path %q", mod.Path, mod.Version, mpath)
 		return nil, ErrRequire
 	}
-	if f.Go != nil {
-		r.versions.LoadOrStore(mod, f.Go.Version)
+	if f.Exports != nil {
+		r.exports.LoadOrStore(mod, f.Exports.Name)
 	}
 
 	return r.modFileToList(f), nil

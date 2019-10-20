@@ -92,8 +92,8 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 		if HasModRoot() {
 			info.Dir = ModRoot()
 			info.GoMod = filepath.Join(info.Dir, "go.mod")
-			if modFile.Go != nil {
-				info.GoVersion = modFile.Go.Version
+			if modFile.Exports != nil {
+				info.Exports = modFile.Exports.Name
 			}
 		}
 		return info
@@ -105,7 +105,7 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 		Indirect: fromBuildList && loaded != nil && !loaded.direct[m.Path],
 	}
 	if loaded != nil {
-		info.GoVersion = loaded.goVersion[m.Path]
+		info.Exports = loaded.exports[m.Path]
 	}
 
 	if cfg.BuildMod == "vendor" {
@@ -155,9 +155,9 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 	// worth the cost, and we're going to overwrite the GoMod and Dir from the
 	// replacement anyway. See https://golang.org/issue/27859.
 	info.Replace = &modinfo.ModulePublic{
-		Path:      r.Path,
-		Version:   r.Version,
-		GoVersion: info.GoVersion,
+		Path:    r.Path,
+		Version: r.Version,
+		Exports: info.Exports,
 	}
 	if r.Version == "" {
 		if filepath.IsAbs(r.Path) {

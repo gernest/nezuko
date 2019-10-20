@@ -107,12 +107,12 @@ by invoking 'go mod edit' with -require, -exclude, and so on.
 }
 
 var (
-	editFmt    = cmdEdit.Flag.Bool("fmt", false, "")
-	editGo     = cmdEdit.Flag.String("go", "", "")
-	editJSON   = cmdEdit.Flag.Bool("json", false, "")
-	editPrint  = cmdEdit.Flag.Bool("print", false, "")
-	editModule = cmdEdit.Flag.String("module", "", "")
-	edits      []func(*modfile.File) // edits specified in flags
+	editFmt     = cmdEdit.Flag.Bool("fmt", false, "")
+	editExports = cmdEdit.Flag.String("exports", "", "")
+	editJSON    = cmdEdit.Flag.Bool("json", false, "")
+	editPrint   = cmdEdit.Flag.Bool("print", false, "")
+	editModule  = cmdEdit.Flag.String("module", "", "")
+	edits       []func(*modfile.File) // edits specified in flags
 )
 
 type flagFunc func(string)
@@ -136,7 +136,7 @@ func init() {
 func runEdit(cmd *base.Command, args []string) {
 	anyFlags :=
 		*editModule != "" ||
-			*editGo != "" ||
+			*editExports != "" ||
 			*editJSON ||
 			*editPrint ||
 			*editFmt ||
@@ -166,9 +166,9 @@ func runEdit(cmd *base.Command, args []string) {
 		}
 	}
 
-	if *editGo != "" {
-		if !modfile.GoVersionRE.MatchString(*editGo) {
-			base.Fatalf(`go mod: invalid -go option; expecting something like "-go 1.12"`)
+	if *editExports != "" {
+		if !modfile.IsValidExport(*editExports) {
+			base.Fatalf(`go mod: invalid -exports option; expecting something like "-exports foo"`)
 		}
 	}
 
@@ -186,8 +186,8 @@ func runEdit(cmd *base.Command, args []string) {
 		modFile.AddModuleStmt(*editModule)
 	}
 
-	if *editGo != "" {
-		if err := modFile.AddGoStmt(*editGo); err != nil {
+	if *editExports != "" {
+		if err := modFile.AddExportsStmt(*editExports); err != nil {
 			base.Fatalf("go: internal error: %v", err)
 		}
 	}
@@ -365,7 +365,7 @@ func flagDropReplace(arg string) {
 // fileJSON is the -json output data structure.
 type fileJSON struct {
 	Module  module.Version
-	Go      string `json:",omitempty"`
+	Exports string `json:",omitempty"`
 	Require []requireJSON
 	Exclude []module.Version
 	Replace []replaceJSON
@@ -386,8 +386,8 @@ type replaceJSON struct {
 func editPrintJSON(modFile *modfile.File) {
 	var f fileJSON
 	f.Module = modFile.Module.Mod
-	if modFile.Go != nil {
-		f.Go = modFile.Go.Version
+	if modFile.Exports != nil {
+		f.Exports = modFile.Exports.Name
 	}
 	for _, r := range modFile.Require {
 		f.Require = append(f.Require, requireJSON{Path: r.Mod.Path, Version: r.Mod.Version, Indirect: r.Indirect})

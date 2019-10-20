@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"path"
@@ -337,24 +336,23 @@ func legacyModInit() {
 		modFile.AddModuleStmt(path)
 	}
 
-	addGoStmt()
+	addExportsStmt()
 }
 
 // InitGoStmt adds a go statement, unless there already is one.
 func InitGoStmt() {
-	if modFile.Go == nil {
-		addGoStmt()
+	if modFile.Exports == nil {
+		addExportsStmt()
 	}
 }
 
 // addGoStmt adds a go statement referring to the current version.
-func addGoStmt() {
-	tags := build.Default.ReleaseTags
-	version := tags[len(tags)-1]
-	if !strings.HasPrefix(version, "go") || !modfile.GoVersionRE.MatchString(version[2:]) {
-		base.Fatalf("z: unrecognized default version %q", version)
+func addExportsStmt() {
+	name := path.Base(modFile.Module.Mod.Path)
+	if !modfile.IsValidExport(name) {
+		base.Fatalf("z: unrecognized export name %q", name)
 	}
-	if err := modFile.AddGoStmt(version[2:]); err != nil {
+	if err := modFile.AddExportsStmt(name); err != nil {
 		base.Fatalf("z: internal error: %v", err)
 	}
 }
@@ -534,7 +532,7 @@ func WriteGoMod() {
 		base.Fatalf("z: %v", err)
 	}
 
-	// Always update go.sum, even if we didn't change z.mod: we may have
+	// Always update z.sum, even if we didn't change z.mod: we may have
 	// downloaded modules that we didn't have before.
 	modfetch.WriteZigSum()
 
