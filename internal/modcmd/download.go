@@ -40,7 +40,7 @@ corresponding to this Go struct:
         Zip      string // absolute path to cached .zip file
         Dir      string // absolute path to cached source root directory
         Sum      string // checksum for path, version (as in go.sum)
-        GoModSum string // checksum for go.mod (as in go.sum)
+        GoModSum string // checksum for z.mod (as in go.sum)
     }
 
 See 'go help modules' for more about module queries.

@@ -108,7 +108,7 @@ func MatchPackagesInFS(pattern string) *Match {
 
 		if !top && cfg.ModulesEnabled {
 			// Ignore other modules found in subdirectories.
-			if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+			if _, err := os.Stat(filepath.Join(path, "z.mod")); err == nil {
 				return filepath.SkipDir
 			}
 		}

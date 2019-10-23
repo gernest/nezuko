@@ -39,7 +39,7 @@ var (
 	ModImportPaths       func(args []string) []*search.Match                 // expand import paths
 	ModPackageBuildInfo  func(main string, deps []string) string             // return module info to embed in binary
 	ModInfoProg          func(info string) []byte                            // wrap module info in .go code for binary
-	ModImportFromFiles   func([]string)                                      // update go.mod to add modules for imports in these files
+	ModImportFromFiles   func([]string)                                      // update z.mod to add modules for imports in these files
 	ModDirImportPath     func(string) string                                 // return effective import path for directory
 )
 
@@ -687,7 +687,7 @@ var (
 	goModPathCache = make(map[string]string)
 )
 
-// goModPath returns the module path in the go.mod in dir, if any.
+// goModPath returns the module path in the z.mod in dir, if any.
 func goModPath(dir string) (path string) {
 	path, ok := goModPathCache[dir]
 	if ok {
@@ -697,7 +697,7 @@ func goModPath(dir string) (path string) {
 		goModPathCache[dir] = path
 	}()
 
-	data, err := ioutil.ReadFile(filepath.Join(dir, "go.mod"))
+	data, err := ioutil.ReadFile(filepath.Join(dir, "z.mod"))
 	if err != nil {
 		return ""
 	}
@@ -766,9 +766,9 @@ func isVersionElement(s string) bool {
 // ModuleImportPath translates import paths found in go modules
 // back down to paths that can be resolved in ordinary builds.
 //
-// Define “new” code as code with a go.mod file in the same directory
+// Define “new” code as code with a z.mod file in the same directory
 // or a parent directory. If an import in new code says x/y/v2/z but
-// x/y/v2/z does not exist and x/y/go.mod says “module x/y/v2”,
+// x/y/v2/z does not exist and x/y/z.mod says “module x/y/v2”,
 // then go build will read the import as x/y/z instead.
 // See golang.org/issue/25069.
 func ModuleImportPath(parent *Package, path string) (found string) {
@@ -795,21 +795,21 @@ func ModuleImportPath(parent *Package, path string) (found string) {
 			goto HaveGoMod
 		}
 	}
-	// This code is not in a tree with a go.mod,
+	// This code is not in a tree with a z.mod,
 	// so apply no changes to the path.
 	return path
 
 HaveGoMod:
-	// This import is in a tree with a go.mod.
+	// This import is in a tree with a z.mod.
 	// Allow it to refer to code in GOPATH/src/x/y/z as x/y/v2/z
-	// if GOPATH/src/x/y/go.mod says module "x/y/v2",
+	// if GOPATH/src/x/y/z.mod says module "x/y/v2",
 
 	// If x/y/v2/z exists, use it unmodified.
 	if bp, _ := cfg.BuildContext.Import(path, ""); bp.Dir != "" {
 		return path
 	}
 
-	// Otherwise look for a go.mod supplying a version element.
+	// Otherwise look for a z.mod supplying a version element.
 	// Some version-like elements may appear in paths but not
 	// be module versions; we skip over those to look for module
 	// versions. For example the module m/v2 might have a
@@ -822,15 +822,15 @@ HaveGoMod:
 		}
 		if bp, _ := cfg.BuildContext.Import(path[:i], ""); bp.Dir != "" {
 			if mpath := goModPath(bp.Dir); mpath != "" {
-				// Found a valid go.mod file, so we're stopping the search.
-				// If the path is m/v2/p and we found m/go.mod that says
+				// Found a valid z.mod file, so we're stopping the search.
+				// If the path is m/v2/p and we found m/z.mod that says
 				// "module m/v2", then we return "m/p".
 				if mpath == path[:j] {
 					return path[:i] + path[j:]
 				}
 				// Otherwise just return the original path.
 				// We didn't find anything worth rewriting,
-				// and the go.mod indicates that we should
+				// and the z.mod indicates that we should
 				// not consider parent directories.
 				return path
 			}

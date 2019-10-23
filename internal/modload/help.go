@@ -30,7 +30,7 @@ in GOPATH and the old 'go get' command.
 
 The quickest way to take advantage of the new Go 1.11 module support
 is to check out your repository into a directory outside GOPATH/src,
-create a go.mod file (described in the next section) there, and run
+create a z.mod file (described in the next section) there, and run
 go commands from within that file tree.
 
 For more fine-grained control, the module support in Go 1.11 respects
@@ -45,8 +45,8 @@ module-aware or running in "module-aware mode".
 If GO111MODULE=auto or is unset, then the go command enables or
 disables module support based on the current directory.
 Module support is enabled only when the current directory is outside
-GOPATH/src and itself contains a go.mod file or is below a directory
-containing a go.mod file.
+GOPATH/src and itself contains a z.mod file or is below a directory
+containing a z.mod file.
 
 In module-aware mode, GOPATH no longer defines the meaning of imports
 during a build, but it still stores downloaded dependencies (in GOPATH/pkg/mod)
@@ -54,19 +54,19 @@ and installed commands (in GOPATH/bin, unless GOBIN is set).
 
 Defining a module
 
-A module is defined by a tree of Go source files with a go.mod file
-in the tree's root directory. The directory containing the go.mod file
+A module is defined by a tree of Go source files with a z.mod file
+in the tree's root directory. The directory containing the z.mod file
 is called the module root. Typically the module root will also correspond
 to a source code repository root (but in general it need not).
 The module is the set of all Go packages in the module root and its
-subdirectories, but excluding subtrees with their own go.mod files.
+subdirectories, but excluding subtrees with their own z.mod files.
 
 The "module path" is the import path prefix corresponding to the module root.
-The go.mod file defines the module path and lists the specific versions
+The z.mod file defines the module path and lists the specific versions
 of other modules that should be used when resolving imports during a build,
 by giving their module paths and versions.
 
-For example, this go.mod declares that the directory containing it is the root
+For example, this z.mod declares that the directory containing it is the root
 of the module with path example.com/m, and it also declares that the module
 depends on specific versions of golang.org/x/text and gopkg.in/yaml.v2:
 
@@ -77,12 +77,12 @@ depends on specific versions of golang.org/x/text and gopkg.in/yaml.v2:
 		gopkg.in/yaml.v2 v2.1.0
 	)
 
-The go.mod file can also specify replacements and excluded versions
+The z.mod file can also specify replacements and excluded versions
 that only apply when building the module directly; they are ignored
 when the module is incorporated into a larger build.
-For more about the go.mod file, see 'go help go.mod'.
+For more about the z.mod file, see 'go help z.mod'.
 
-To start a new module, simply create a go.mod file in the root of the
+To start a new module, simply create a z.mod file in the root of the
 module's directory tree, containing only a module statement.
 The 'go mod init' command can be used to do this:
 
@@ -92,21 +92,21 @@ In a project already using an existing dependency management tool like
 godep, glide, or dep, 'go mod init' will also add require statements
 matching the existing configuration.
 
-Once the go.mod file exists, no additional steps are required:
+Once the z.mod file exists, no additional steps are required:
 go commands like 'go build', 'go test', or even 'go list' will automatically
 add new dependencies as needed to satisfy imports.
 
 The main module and the build list
 
 The "main module" is the module containing the directory where the go command
-is run. The go command finds the module root by looking for a go.mod in the
+is run. The go command finds the module root by looking for a z.mod in the
 current directory, or else the current directory's parent directory,
 or else the parent's parent directory, and so on.
 
-The main module's go.mod file defines the precise set of packages available
+The main module's z.mod file defines the precise set of packages available
 for use by the go command, through require, replace, and exclude statements.
 Dependency modules, found by following require statements, also contribute
-to the definition of that set of packages, but only through their go.mod
+to the definition of that set of packages, but only through their z.mod
 files' require statements: any replace and exclude statements in dependency
 modules are ignored. The replace and exclude statements therefore allow the
 main module complete control over its own build, without also being subject
@@ -129,16 +129,16 @@ and the build list. For example:
 
 Maintaining module requirements
 
-The go.mod file is meant to be readable and editable by both
-programmers and tools. The go command itself automatically updates the go.mod file
+The z.mod file is meant to be readable and editable by both
+programmers and tools. The go command itself automatically updates the z.mod file
 to maintain a standard formatting and the accuracy of require statements.
 
 Any go command that finds an unfamiliar import will look up the module
 containing that import and add the latest version of that module
-to go.mod automatically. In most cases, therefore, it suffices to
+to z.mod automatically. In most cases, therefore, it suffices to
 add an import to source code and run 'go build', 'go test', or even 'go list':
 as part of analyzing the package, the go command will discover
-and resolve the import and update the go.mod file.
+and resolve the import and update the z.mod file.
 
 Any go command can determine that a module requirement is
 missing and must be added, even when considering only a single
@@ -149,45 +149,45 @@ all packages in the module, across all possible build configurations
 The 'go mod tidy' command builds that view and then
 adds any missing module requirements and removes unnecessary ones.
 
-As part of maintaining the require statements in go.mod, the go command
+As part of maintaining the require statements in z.mod, the go command
 tracks which ones provide packages imported directly by the current module
 and which ones provide packages only used indirectly by other module
 dependencies. Requirements needed only for indirect uses are marked with a
-"// indirect" comment in the go.mod file. Indirect requirements are
-automatically removed from the go.mod file once they are implied by other
+"// indirect" comment in the z.mod file. Indirect requirements are
+automatically removed from the z.mod file once they are implied by other
 direct requirements. Indirect requirements only arise when using modules
 that fail to state some of their own dependencies or when explicitly
 upgrading a module's dependencies ahead of its own stated requirements.
 
-Because of this automatic maintenance, the information in go.mod is an
+Because of this automatic maintenance, the information in z.mod is an
 up-to-date, readable description of the build.
 
-The 'go get' command updates go.mod to change the module versions used in a
+The 'go get' command updates z.mod to change the module versions used in a
 build. An upgrade of one module may imply upgrading others, and similarly a
 downgrade of one module may imply downgrading others. The 'go get' command
-makes these implied changes as well. If go.mod is edited directly, commands
+makes these implied changes as well. If z.mod is edited directly, commands
 like 'go build' or 'go list' will assume that an upgrade is intended and
-automatically make any implied upgrades and update go.mod to reflect them.
+automatically make any implied upgrades and update z.mod to reflect them.
 
 The 'go mod' command provides other functionality for use in maintaining
-and understanding modules and go.mod files. See 'go help mod'.
+and understanding modules and z.mod files. See 'go help mod'.
 
-The -mod build flag provides additional control over updating and use of go.mod.
+The -mod build flag provides additional control over updating and use of z.mod.
 
 If invoked with -mod=readonly, the go command is disallowed from the implicit
-automatic updating of go.mod described above. Instead, it fails when any changes
-to go.mod are needed. This setting is most useful to check that go.mod does
+automatic updating of z.mod described above. Instead, it fails when any changes
+to z.mod are needed. This setting is most useful to check that z.mod does
 not need updates, such as in a continuous integration and testing system.
-The "go get" command remains permitted to update go.mod even with -mod=readonly,
+The "go get" command remains permitted to update z.mod even with -mod=readonly,
 and the "go mod" commands do not take the -mod flag (or any other build flags).
 
 If invoked with -mod=vendor, the go command assumes that the vendor
 directory holds the correct copies of dependencies and ignores
-the dependency descriptions in go.mod.
+the dependency descriptions in z.mod.
 
 Pseudo-versions
 
-The go.mod file and the go command more generally use semantic versions as
+The z.mod file and the go command more generally use semantic versions as
 the standard form for describing module versions, so that versions can be
 compared to determine which should be considered earlier or later than another.
 A module version like v1.2.3 is introduced by tagging a revision in the
@@ -203,7 +203,7 @@ There are three pseudo-version forms:
 
 vX.0.0-yyyymmddhhmmss-abcdefabcdef is used when there is no earlier
 versioned commit with an appropriate major version before the target commit.
-(This was originally the only form, so some older go.mod files use this form
+(This was originally the only form, so some older z.mod files use this form
 even for commits that do follow tags.)
 
 vX.Y.Z-pre.0.yyyymmddhhmmss-abcdefabcdef is used when the most
@@ -220,8 +220,8 @@ module query.
 Module queries
 
 The go command accepts a "module query" in place of a module version
-both on the command line and in the main module's go.mod file.
-(After evaluating a query found in the main module's go.mod file,
+both on the command line and in the main module's z.mod file.
+(After evaluating a query found in the main module's z.mod file,
 the go command updates the file to replace the query with its result.)
 
 A fully-specified semantic version, such as "v1.2.3",
@@ -250,7 +250,7 @@ instead of "v1.2.3-pre1", even though "v1.2.3-pre1" is nearer
 to the comparison target.
 
 Module versions disallowed by exclude statements in the
-main module's go.mod are considered unavailable and cannot
+main module's z.mod are considered unavailable and cannot
 be returned by queries.
 
 For example, these commands are all valid:
@@ -313,7 +313,7 @@ Code written before the semantic import versioning convention
 was introduced may use major versions v2 and later to describe
 the same set of unversioned import paths as used in v0 and v1.
 To accommodate such code, if a source code repository has a
-v2.0.0 or later tag for a file tree with no go.mod, the version is
+v2.0.0 or later tag for a file tree with no z.mod, the version is
 considered to be part of the v1 module's available versions
 and is given an +incompatible suffix when converted to a module
 version, as in v2.0.0+incompatible. The +incompatible tag is also
@@ -338,7 +338,7 @@ module file trees.
 Module downloading and verification
 
 The go command maintains, in the main module's root directory alongside
-go.mod, a file named go.sum containing the expected cryptographic checksums
+z.mod, a file named go.sum containing the expected cryptographic checksums
 of the content of specific module versions. Each time a dependency is
 used, its checksum is added to go.sum if missing or else required to match
 the existing entry in go.sum.
@@ -380,15 +380,15 @@ are still ignored.
 }
 
 var HelpGoMod = &base.Command{
-	UsageLine: "go.mod",
-	Short:     "the go.mod file",
+	UsageLine: "z.mod",
+	Short:     "the z.mod file",
 	Long: `
-A module version is defined by a tree of source files, with a go.mod
+A module version is defined by a tree of source files, with a z.mod
 file in its root. When the go command is run, it looks in the current
-directory and then successive parent directories to find the go.mod
+directory and then successive parent directories to find the z.mod
 marking the root of the main (current) module.
 
-The go.mod file itself is line-oriented, with // comments but
+The z.mod file itself is line-oriented, with // comments but
 no /* */ comments. Each line holds a single directive, made up of a
 verb followed by arguments. For example:
 
@@ -405,7 +405,7 @@ The verbs are
 	require, to require a particular module at a given version or later;
 	exclude, to exclude a particular module version from use; and
 	replace, to replace a module version with a different module version.
-Exclude and replace apply only in the main module's go.mod and are ignored
+Exclude and replace apply only in the main module's z.mod and are ignored
 in dependencies.  See https://research.swtch.com/vgo-mvs for details.
 
 The leading verb can be factored out of adjacent lines to create a block,
@@ -416,14 +416,14 @@ like in Go imports:
 		old/thing v1.2.3
 	)
 
-The go.mod file is designed both to be edited directly and to be
+The z.mod file is designed both to be edited directly and to be
 easily updated by tools. The 'go mod edit' command can be used to
-parse and edit the go.mod file from programs and tools.
+parse and edit the z.mod file from programs and tools.
 See 'go help mod edit'.
 
-The go command automatically updates go.mod each time it uses the
-module graph, to make sure go.mod always accurately reflects reality
-and is properly formatted. For example, consider this go.mod file:
+The go command automatically updates z.mod each time it uses the
+module graph, to make sure z.mod always accurately reflects reality
+and is properly formatted. For example, consider this z.mod file:
 
         module M
 
@@ -447,18 +447,18 @@ available version of D, perhaps D v1.2.4 or D v1.3.0.
 
 The update removes redundant or misleading requirements.
 For example, if A v1.0.0 itself requires B v1.2.0 and C v1.0.0,
-then go.mod's requirement of B v1.0.0 is misleading (superseded by
+then z.mod's requirement of B v1.0.0 is misleading (superseded by
 A's need for v1.2.0), and its requirement of C v1.0.0 is redundant
 (implied by A's need for the same version), so both will be removed.
 If module M contains packages that directly import packages from B or
 C, then the requirements will be kept but updated to the actual
 versions being used.
 
-Finally, the update reformats the go.mod in a canonical formatting, so
+Finally, the update reformats the z.mod in a canonical formatting, so
 that future mechanical changes will result in minimal diffs.
 
 Because the module graph defines the meaning of import statements, any
-commands that load packages also use and therefore update go.mod,
+commands that load packages also use and therefore update z.mod,
 including go build, go get, go install, go list, go test, go mod graph,
 go mod tidy, and go mod why.
 	`,

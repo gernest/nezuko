@@ -82,7 +82,7 @@ require downgrading other dependencies, and 'go get' does
 this automatically as well.
 
 The -m flag instructs get to stop here, after resolving, upgrading,
-and downgrading modules and updating go.mod. When using -m,
+and downgrading modules and updating z.mod. When using -m,
 each specified package path must be a module path as well,
 not the import path of a package below the module root.
 
@@ -199,7 +199,7 @@ func runGet(cmd *base.Command, args []string) {
 
 	modload.LoadBuildList()
 
-	// Do not allow any updating of go.mod until we've applied
+	// Do not allow any updating of z.mod until we've applied
 	// all the requested changes and checked that the result matches
 	// what was requested.
 	modload.DisallowWriteGoMod()
@@ -413,7 +413,7 @@ func runGet(cmd *base.Command, args []string) {
 	list = append(list, named...)
 	list = append(list, required...)
 	modload.SetBuildList(list)
-	modload.ReloadBuildList() // note: does not update go.mod
+	modload.ReloadBuildList() // note: does not update z.mod
 	base.ExitIfErrors()
 
 	// Scan for and apply any needed downgrades.
@@ -430,7 +430,7 @@ func runGet(cmd *base.Command, args []string) {
 			base.Fatalf("go get: %v", err)
 		}
 		modload.SetBuildList(list)
-		modload.ReloadBuildList() // note: does not update go.mod
+		modload.ReloadBuildList() // note: does not update z.mod
 	}
 	base.ExitIfErrors()
 
@@ -488,7 +488,7 @@ func runGet(cmd *base.Command, args []string) {
 		base.Fatalf("%v", buf.String())
 	}
 
-	// Everything succeeded. Update go.mod.
+	// Everything succeeded. Update z.mod.
 	modload.AllowWriteGoMod()
 	modload.WriteGoMod()
 

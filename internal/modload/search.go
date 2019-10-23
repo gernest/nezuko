@@ -80,7 +80,7 @@ func matchPackages(pattern string, tags map[string]bool, useStd bool, modules []
 				return filepath.SkipDir
 			}
 			if path != root {
-				if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+				if _, err := os.Stat(filepath.Join(path, "z.mod")); err == nil {
 					return filepath.SkipDir
 				}
 			}

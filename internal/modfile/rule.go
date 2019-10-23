@@ -19,7 +19,7 @@ import (
 	"github.com/gernest/nezuko/internal/semver"
 )
 
-// A File is the parsed, interpreted form of a go.mod file.
+// A File is the parsed, interpreted form of a z.mod file.
 type File struct {
 	Module  *Module
 	Exports *Exports
@@ -108,11 +108,11 @@ func Parse(file string, data []byte, fix VersionFixer) (*File, error) {
 }
 
 // ParseLax is like Parse but ignores unknown statements.
-// It is used when parsing go.mod files other than the main module,
+// It is used when parsing z.mod files other than the main module,
 // under the theory that most statement types we add in the future will
 // only apply in the main module, like exclude and replace,
 // and so we get better gradual deployments if old go commands
-// simply ignore those statements when found in go.mod files
+// simply ignore those statements when found in z.mod files
 // in dependencies.
 func ParseLax(file string, data []byte, fix VersionFixer) (*File, error) {
 	return parseToFile(file, data, fix, false)
@@ -172,7 +172,7 @@ func (f *File) add(errs *bytes.Buffer, line *Line, verb string, args []string, f
 	if !strict {
 		switch verb {
 		case "module", "require", "go":
-			// want these even for dependency go.mods
+			// want these even for dependency z.mods
 		default:
 			return
 		}
@@ -322,7 +322,7 @@ func (f *File) add(errs *bytes.Buffer, line *Line, verb string, args []string, f
 }
 
 // isIndirect reports whether line has a "// indirect" comment,
-// meaning it is in go.mod only for its effect on indirect dependencies,
+// meaning it is in z.mod only for its effect on indirect dependencies,
 // so that it can be dropped entirely once the effective version of the
 // indirect dependency reaches the given minimum version.
 func isIndirect(line *Line) bool {
@@ -373,7 +373,7 @@ func setIndirect(line *Line, indirect bool) {
 // as a directory path. Just like on the go command line, relative paths
 // and rooted paths are directory paths; the rest are module paths.
 func IsDirectoryPath(ns string) bool {
-	// Because go.mod files can move from one system to another,
+	// Because z.mod files can move from one system to another,
 	// we check all known path syntaxes, both Unix and Windows.
 	return strings.HasPrefix(ns, "./") || strings.HasPrefix(ns, "../") || strings.HasPrefix(ns, "/") ||
 		strings.HasPrefix(ns, `.\`) || strings.HasPrefix(ns, `..\`) || strings.HasPrefix(ns, `\`) ||
@@ -381,7 +381,7 @@ func IsDirectoryPath(ns string) bool {
 }
 
 // MustQuote reports whether s must be quoted in order to appear as
-// a single token in a go.mod line.
+// a single token in a z.mod line.
 func MustQuote(s string) bool {
 	for _, r := range s {
 		if !unicode.IsPrint(r) || r == ' ' || r == '"' || r == '\'' || r == '`' {
@@ -391,7 +391,7 @@ func MustQuote(s string) bool {
 	return s == "" || strings.Contains(s, "//") || strings.Contains(s, "/*")
 }
 
-// AutoQuote returns s or, if quoting is required for s to appear in a go.mod,
+// AutoQuote returns s or, if quoting is required for s to appear in a z.mod,
 // the quotation of s.
 func AutoQuote(s string) string {
 	if MustQuote(s) {

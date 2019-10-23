@@ -40,8 +40,8 @@ var checkTests = []struct {
 	// For gopkg.in, .v1 means v1 only (not v0).
 	// But early versions of vgo still generated v0 pseudo-versions for it.
 	// Even though now we'd generate those as v1 pseudo-versions,
-	// we accept the old pseudo-versions to avoid breaking existing go.mod files.
-	// For example gopkg.in/yaml.v2@v2.2.1's go.mod requires check.v1 at a v0 pseudo-version.
+	// we accept the old pseudo-versions to avoid breaking existing z.mod files.
+	// For example gopkg.in/yaml.v2@v2.2.1's z.mod requires check.v1 at a v0 pseudo-version.
 	{"gopkg.in/check.v1", "v0.0.0", false},
 	{"gopkg.in/check.v1", "v0.0.0-20160102150405-abcdef123456", true},
 

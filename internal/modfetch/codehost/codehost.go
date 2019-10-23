@@ -26,7 +26,7 @@ import (
 
 // Downloaded size limits.
 const (
-	MaxGoMod   = 16 << 20  // maximum size of go.mod file
+	MaxGoMod   = 16 << 20  // maximum size of z.mod file
 	MaxLICENSE = 16 << 20  // maximum size of LICENSE file
 	MaxZipFile = 500 << 20 // maximum size of downloaded zip file
 )

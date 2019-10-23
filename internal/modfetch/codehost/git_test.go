@@ -386,7 +386,7 @@ var readZipTests = []struct {
 		files: map[string]uint64{
 			"prefix/":                0,
 			"prefix/submod/":         0,
-			"prefix/submod/go.mod":   53,
+			"prefix/submod/z.mod":   53,
 			"prefix/submod/pkg/":     0,
 			"prefix/submod/pkg/p.go": 31,
 		},

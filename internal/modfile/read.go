@@ -73,7 +73,7 @@ func (c *Comments) Comment() *Comments {
 	return c
 }
 
-// A FileSyntax represents an entire go.mod file.
+// A FileSyntax represents an entire z.mod file.
 type FileSyntax struct {
 	Name string // file path
 	Comments
@@ -833,7 +833,7 @@ var (
 
 // ModulePath returns the module path from the gomod file text.
 // If it cannot find a module path, it returns an empty string.
-// It is tolerant of unrelated problems in the go.mod file.
+// It is tolerant of unrelated problems in the z.mod file.
 func ModulePath(mod []byte) string {
 	for len(mod) > 0 {
 		line := mod

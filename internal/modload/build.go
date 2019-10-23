@@ -91,7 +91,7 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 		}
 		if HasModRoot() {
 			info.Dir = ModRoot()
-			info.GoMod = filepath.Join(info.Dir, "go.mod")
+			info.GoMod = filepath.Join(info.Dir, "z.mod")
 			if modFile.Exports != nil {
 				info.Exports = modFile.Exports.Name
 			}
@@ -168,7 +168,7 @@ func moduleInfo(m module.Version, fromBuildList bool) *modinfo.ModulePublic {
 	}
 	complete(info.Replace)
 	info.Dir = info.Replace.Dir
-	info.GoMod = filepath.Join(info.Dir, "go.mod")
+	info.GoMod = filepath.Join(info.Dir, "z.mod")
 	return info
 }
 

@@ -325,7 +325,7 @@ func MatchPathMajor(v, pathMajor string) bool {
 	}
 	if strings.HasPrefix(v, "v0.0.0-") && pathMajor == ".v1" {
 		// Allow old bug in pseudo-versions that generated v0.0.0- pseudoversion for gopkg .v1.
-		// For example, gopkg.in/yaml.v2@v2.2.1's go.mod requires gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405.
+		// For example, gopkg.in/yaml.v2@v2.2.1's z.mod requires gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405.
 		return true
 	}
 	m := semver.Major(v)

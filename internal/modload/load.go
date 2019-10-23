@@ -269,7 +269,7 @@ func DirImportPath(dir string) string {
 	return "."
 }
 
-// LoadBuildList loads and returns the build list from go.mod.
+// LoadBuildList loads and returns the build list from z.mod.
 // The loading of the build list happens automatically in ImportPaths:
 // LoadBuildList need only be called if ImportPaths is not
 // (typically in commands that care about the module but
@@ -558,8 +558,8 @@ func (ld *loader) load(roots func() []string) {
 	}
 
 	// Mix in direct markings (really, lack of indirect markings)
-	// from go.mod, unless we scanned the whole module
-	// and can therefore be sure we know better than go.mod.
+	// from z.mod, unless we scanned the whole module
+	// and can therefore be sure we know better than z.mod.
 	if !ld.isALL && modFile != nil {
 		for _, r := range modFile.Require {
 			if !r.Indirect {
@@ -804,7 +804,7 @@ func WhyDepth(path string) int {
 	return n
 }
 
-// Replacement returns the replacement for mod, if any, from go.mod.
+// Replacement returns the replacement for mod, if any, from z.mod.
 // If there is no replacement for mod, Replacement returns
 // a module.Version with Path == "".
 func Replacement(mod module.Version) module.Version {
@@ -938,7 +938,7 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 			if !filepath.IsAbs(dir) {
 				dir = filepath.Join(ModRoot(), dir)
 			}
-			gomod := filepath.Join(dir, "go.mod")
+			gomod := filepath.Join(dir, "z.mod")
 			data, err := ioutil.ReadFile(gomod)
 			if err != nil {
 				base.Errorf("z: parsing %s: %v", base.ShortPath(gomod), err)
@@ -971,18 +971,18 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 		base.Errorf("z: %s@%s: %v\n", mod.Path, mod.Version, err)
 		return nil, ErrRequire
 	}
-	f, err := modfile.ParseLax("go.mod", data, nil)
+	f, err := modfile.ParseLax("z.mod", data, nil)
 	if err != nil {
-		base.Errorf("z: %s@%s: parsing go.mod: %v", mod.Path, mod.Version, err)
+		base.Errorf("z: %s@%s: parsing z.mod: %v", mod.Path, mod.Version, err)
 		return nil, ErrRequire
 	}
 
 	if f.Module == nil {
-		base.Errorf("z: %s@%s: parsing go.mod: missing module line", mod.Path, mod.Version)
+		base.Errorf("z: %s@%s: parsing z.mod: missing module line", mod.Path, mod.Version)
 		return nil, ErrRequire
 	}
 	if mpath := f.Module.Mod.Path; mpath != origPath && mpath != mod.Path {
-		base.Errorf("z: %s@%s: parsing go.mod: unexpected module path %q", mod.Path, mod.Version, mpath)
+		base.Errorf("z: %s@%s: parsing z.mod: unexpected module path %q", mod.Path, mod.Version, mpath)
 		return nil, ErrRequire
 	}
 	if f.Exports != nil {

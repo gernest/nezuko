@@ -269,12 +269,12 @@ type modSum struct {
 
 var goSum struct {
 	mu        sync.Mutex
-	m         map[module.Version][]string // content of go.sum file (+ go.modverify if present)
+	m         map[module.Version][]string // content of go.sum file (+ z.modverify if present)
 	checked   map[modSum]bool             // sums actually checked during execution
 	dirty     bool                        // whether we added any new sums to m
 	overwrite bool                        // if true, overwrite go.sum without incorporating its contents
 	enabled   bool                        // whether to use go.sum at all
-	modverify string                      // path to go.modverify, to be deleted
+	modverify string                      // path to z.modverify, to be deleted
 }
 
 // initGoSum initializes the go.sum data.
@@ -297,8 +297,8 @@ func initGoSum() bool {
 	goSum.enabled = true
 	readGoSum(goSum.m, ZigSumFile, data)
 
-	// Add old go.modverify file.
-	// We'll delete go.modverify in WriteGoSum.
+	// Add old z.modverify file.
+	// We'll delete z.modverify in WriteGoSum.
 	alt := strings.TrimSuffix(ZigSumFile, ".sum") + ".modverify"
 	if data, err := ioutil.ReadFile(alt); err == nil {
 		migrate := make(map[module.Version][]string)
@@ -313,7 +313,7 @@ func initGoSum() bool {
 	return true
 }
 
-// emptyGoModHash is the hash of a 1-file tree containing a 0-length go.mod.
+// emptyGoModHash is the hash of a 1-file tree containing a 0-length z.mod.
 // A bug caused us to write these into go.sum files for non-modules.
 // We detect and remove them.
 const emptyGoModHash = "h1:G7mAYYxgmS0lVkHyy2hEOLQCFB0DlQFTMLWggykrydY="
@@ -376,22 +376,22 @@ func checkSum(mod module.Version) {
 	checkOneSum(mod, h)
 }
 
-// goModSum returns the checksum for the go.mod contents.
+// goModSum returns the checksum for the z.mod contents.
 func goModSum(data []byte) (string, error) {
-	return dirhash.Hash1([]string{"go.mod"}, func(string) (io.ReadCloser, error) {
+	return dirhash.Hash1([]string{"z.mod"}, func(string) (io.ReadCloser, error) {
 		return ioutil.NopCloser(bytes.NewReader(data)), nil
 	})
 }
 
-// checkGoMod checks the given module's go.mod checksum;
-// data is the go.mod content.
+// checkGoMod checks the given module's z.mod checksum;
+// data is the z.mod content.
 func checkGoMod(path, version string, data []byte) {
 	h, err := goModSum(data)
 	if err != nil {
-		base.Fatalf("verifying %s %s go.mod: %v", path, version, err)
+		base.Fatalf("verifying %s %s z.mod: %v", path, version, err)
 	}
 
-	checkOneSum(module.Version{Path: path, Version: version + "/go.mod"}, h)
+	checkOneSum(module.Version{Path: path, Version: version + "/z.mod"}, h)
 }
 
 // checkOneSum checks that the recorded hash for mod is h.
@@ -447,7 +447,7 @@ func WriteZigSum() {
 
 	if !goSum.enabled {
 		// If we haven't read the go.sum file yet, don't bother writing it: at best,
-		// we could rename the go.modverify file if it isn't empty, but we haven't
+		// we could rename the z.modverify file if it isn't empty, but we haven't
 		// needed to touch it so far — how important could it be?
 		return
 	}
@@ -508,7 +508,7 @@ func WriteZigSum() {
 	}
 
 	if err := renameio.WriteFile(ZigSumFile, buf.Bytes()); err != nil {
-		base.Fatalf("z: writing go.sum: %v", err)
+		base.Fatalf("z: writing z.sum: %v", err)
 	}
 
 	goSum.checked = make(map[modSum]bool)
@@ -529,9 +529,9 @@ func TrimGoSum(keep map[module.Version]bool) {
 	}
 
 	for m := range goSum.m {
-		// If we're keeping x@v we also keep x@v/go.mod.
-		// Map x@v/go.mod back to x@v for the keep lookup.
-		noGoMod := module.Version{Path: m.Path, Version: strings.TrimSuffix(m.Version, "/go.mod")}
+		// If we're keeping x@v we also keep x@v/z.mod.
+		// Map x@v/z.mod back to x@v for the keep lookup.
+		noGoMod := module.Version{Path: m.Path, Version: strings.TrimSuffix(m.Version, "/z.mod")}
 		if !keep[m] && !keep[noGoMod] {
 			delete(goSum.m, m)
 			goSum.dirty = true

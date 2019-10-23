@@ -52,9 +52,9 @@ var queryTests = []struct {
 }{
 	/*
 		git init
-		echo module vcs-test.golang.org/git/querytest.git >go.mod
-		git add go.mod
-		git commit -m v1 go.mod
+		echo module vcs-test.golang.org/git/querytest.git >z.mod
+		git add z.mod
+		git commit -m v1 z.mod
 		git tag start
 		for i in v0.0.0-pre1 v0.0.0 v0.0.1 v0.0.2 v0.0.3 v0.1.0 v0.1.1 v0.1.2 v0.3.0 v1.0.0 v1.1.0 v1.9.0 v1.9.9 v1.9.10-pre1; do
 			echo before $i >status
@@ -68,8 +68,8 @@ var queryTests = []struct {
 
 		git branch v2 start
 		git checkout v2
-		echo module vcs-test.golang.org/git/querytest.git/v2 >go.mod
-		git commit -m v2 go.mod
+		echo module vcs-test.golang.org/git/querytest.git/v2 >z.mod
+		git commit -m v2 z.mod
 		for i in v2.0.0 v2.1.0 v2.2.0 v2.5.5; do
 			echo before $i >status
 			git add status

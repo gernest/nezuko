@@ -23,30 +23,30 @@ import (
 )
 
 var cmdEdit = &base.Command{
-	UsageLine: "go mod edit [editing flags] [go.mod]",
-	Short:     "edit go.mod from tools or scripts",
+	UsageLine: "go mod edit [editing flags] [z.mod]",
+	Short:     "edit z.mod from tools or scripts",
 	Long: `
-Edit provides a command-line interface for editing go.mod,
-for use primarily by tools or scripts. It reads only go.mod;
+Edit provides a command-line interface for editing z.mod,
+for use primarily by tools or scripts. It reads only z.mod;
 it does not look up information about the modules involved.
-By default, edit reads and writes the go.mod file of the main module,
+By default, edit reads and writes the z.mod file of the main module,
 but a different target file can be specified after the editing flags.
 
 The editing flags specify a sequence of editing operations.
 
-The -fmt flag reformats the go.mod file without making other changes.
+The -fmt flag reformats the z.mod file without making other changes.
 This reformatting is also implied by any other modifications that use or
-rewrite the go.mod file. The only time this flag is needed is if no other
+rewrite the z.mod file. The only time this flag is needed is if no other
 flags are specified, as in 'go mod edit -fmt'.
 
-The -module flag changes the module's path (the go.mod file's module line).
+The -module flag changes the module's path (the z.mod file's module line).
 
 The -require=path@version and -droprequire=path flags
 add and drop a requirement on the given module path and version.
 Note that -require overrides any existing requirements on path.
 These flags are mainly for tools that understand the module graph.
 Users should prefer 'go get path@version' or 'go get path@none',
-which make other go.mod adjustments as needed to satisfy
+which make other z.mod adjustments as needed to satisfy
 constraints imposed by other modules.
 
 The -exclude=path@version and -dropexclude=path@version flags
@@ -66,11 +66,11 @@ are applied in the order given.
 
 The -go=version flag sets the expected Go language version.
 
-The -print flag prints the final go.mod in its text format instead of
-writing it back to go.mod.
+The -print flag prints the final z.mod in its text format instead of
+writing it back to z.mod.
 
-The -json flag prints the final go.mod file in JSON format instead of
-writing it back to go.mod. The JSON output corresponds to these Go types:
+The -json flag prints the final z.mod file in JSON format instead of
+writing it back to z.mod. The JSON output corresponds to these Go types:
 
 	type Module struct {
 		Path string
@@ -96,11 +96,11 @@ writing it back to go.mod. The JSON output corresponds to these Go types:
 		New Module
 	}
 
-Note that this only describes the go.mod file itself, not other modules
+Note that this only describes the z.mod file itself, not other modules
 referred to indirectly. For the full set of modules available to a build,
 use 'go list -m -json all'.
 
-For example, a tool can obtain the go.mod as a data structure by
+For example, a tool can obtain the z.mod as a data structure by
 parsing the output of 'go mod edit -json' and can then make changes
 by invoking 'go mod edit' with -require, -exclude, and so on.
 	`,
@@ -157,7 +157,7 @@ func runEdit(cmd *base.Command, args []string) {
 	if len(args) == 1 {
 		gomod = args[0]
 	} else {
-		gomod = filepath.Join(modload.ModRoot(), "go.mod")
+		gomod = filepath.Join(modload.ModRoot(), "z.mod")
 	}
 
 	if *editModule != "" {
@@ -219,7 +219,7 @@ func runEdit(cmd *base.Command, args []string) {
 	defer unlock()
 	lockedData, err := ioutil.ReadFile(gomod)
 	if err == nil && !bytes.Equal(lockedData, data) {
-		base.Fatalf("z: go.mod changed during editing; not overwriting")
+		base.Fatalf("z: z.mod changed during editing; not overwriting")
 	}
 	if err := ioutil.WriteFile(gomod, out, 0666); err != nil {
 		base.Fatalf("z: %v", err)

@@ -91,7 +91,7 @@ var codeRepoTests = []struct {
 		name:    "45f53230a74ad275c7127e117ac46914c8126160",
 		short:   "45f53230a74a",
 		time:    time.Date(2018, 7, 19, 1, 21, 27, 0, time.UTC),
-		ziperr:  "missing github.com/rsc/vgotest1/go.mod and .../v2/go.mod at revision v2.0.0",
+		ziperr:  "missing github.com/rsc/vgotest1/z.mod and .../v2/z.mod at revision v2.0.0",
 	},
 	{
 		path:    "github.com/rsc/vgotest1",
@@ -126,8 +126,8 @@ var codeRepoTests = []struct {
 		name:     "45f53230a74ad275c7127e117ac46914c8126160",
 		short:    "45f53230a74a",
 		time:     time.Date(2018, 7, 19, 1, 21, 27, 0, time.UTC),
-		gomoderr: "missing github.com/rsc/vgotest1/go.mod and .../v2/go.mod at revision v2.0.0",
-		ziperr:   "missing github.com/rsc/vgotest1/go.mod and .../v2/go.mod at revision v2.0.0",
+		gomoderr: "missing github.com/rsc/vgotest1/z.mod and .../v2/z.mod at revision v2.0.0",
+		ziperr:   "missing github.com/rsc/vgotest1/z.mod and .../v2/z.mod at revision v2.0.0",
 	},
 	{
 		path:    "github.com/rsc/vgotest1/v54321",
@@ -136,7 +136,7 @@ var codeRepoTests = []struct {
 		name:    "80d85c5d4d17598a0e9055e7c175a32b415d6128",
 		short:   "80d85c5d4d17",
 		time:    time.Date(2018, 2, 19, 23, 10, 6, 0, time.UTC),
-		ziperr:  "missing github.com/rsc/vgotest1/go.mod and .../v54321/go.mod at revision 80d85c5d4d17",
+		ziperr:  "missing github.com/rsc/vgotest1/z.mod and .../v54321/z.mod at revision 80d85c5d4d17",
 	},
 	{
 		path: "github.com/rsc/vgotest1/submod",
@@ -155,9 +155,9 @@ var codeRepoTests = []struct {
 		name:    "8afe2b2efed96e0880ecd2a69b98a53b8c2738b6",
 		short:   "8afe2b2efed9",
 		time:    time.Date(2018, 2, 19, 23, 12, 7, 0, time.UTC),
-		gomod:   "module \"github.com/vgotest1/submod\" // submod/go.mod\n",
+		gomod:   "module \"github.com/vgotest1/submod\" // submod/z.mod\n",
 		zip: []string{
-			"go.mod",
+			"z.mod",
 			"pkg/p.go",
 			"LICENSE",
 		},
@@ -169,11 +169,11 @@ var codeRepoTests = []struct {
 		name:    "b769f2de407a4db81af9c5de0a06016d60d2ea09",
 		short:   "b769f2de407a",
 		time:    time.Date(2018, 2, 19, 23, 13, 36, 0, time.UTC),
-		gomod:   "module \"github.com/rsc/vgotest1\" // root go.mod\nrequire \"github.com/rsc/vgotest1/submod\" v1.0.5\n",
+		gomod:   "module \"github.com/rsc/vgotest1\" // root z.mod\nrequire \"github.com/rsc/vgotest1/submod\" v1.0.5\n",
 		zip: []string{
 			"LICENSE",
 			"README.md",
-			"go.mod",
+			"z.mod",
 			"pkg/p.go",
 		},
 	},
@@ -184,7 +184,7 @@ var codeRepoTests = []struct {
 		name:    "ea65f87c8f52c15ea68f3bdd9925ef17e20d91e9",
 		short:   "ea65f87c8f52",
 		time:    time.Date(2018, 2, 19, 23, 14, 23, 0, time.UTC),
-		gomod:   "module \"github.com/rsc/vgotest1/v2\" // root go.mod\n",
+		gomod:   "module \"github.com/rsc/vgotest1/v2\" // root z.mod\n",
 	},
 	{
 		path:     "github.com/rsc/vgotest1/v2",
@@ -193,7 +193,7 @@ var codeRepoTests = []struct {
 		name:     "f18795870fb14388a21ef3ebc1d75911c8694f31",
 		short:    "f18795870fb1",
 		time:     time.Date(2018, 2, 19, 23, 16, 4, 0, time.UTC),
-		gomoderr: "github.com/rsc/vgotest1/v2/go.mod has non-.../v2 module path \"github.com/rsc/vgotest\" at revision v2.0.3",
+		gomoderr: "github.com/rsc/vgotest1/v2/z.mod has non-.../v2 module path \"github.com/rsc/vgotest\" at revision v2.0.3",
 	},
 	{
 		path:     "github.com/rsc/vgotest1/v2",
@@ -202,7 +202,7 @@ var codeRepoTests = []struct {
 		name:     "1f863feb76bc7029b78b21c5375644838962f88d",
 		short:    "1f863feb76bc",
 		time:     time.Date(2018, 2, 20, 0, 3, 38, 0, time.UTC),
-		gomoderr: "github.com/rsc/vgotest1/go.mod and .../v2/go.mod both have .../v2 module paths at revision v2.0.4",
+		gomoderr: "github.com/rsc/vgotest1/z.mod and .../v2/z.mod both have .../v2 module paths at revision v2.0.4",
 	},
 	{
 		path:    "github.com/rsc/vgotest1/v2",
@@ -211,7 +211,7 @@ var codeRepoTests = []struct {
 		name:    "2f615117ce481c8efef46e0cc0b4b4dccfac8fea",
 		short:   "2f615117ce48",
 		time:    time.Date(2018, 2, 20, 0, 3, 59, 0, time.UTC),
-		gomod:   "module \"github.com/rsc/vgotest1/v2\" // v2/go.mod\n",
+		gomod:   "module \"github.com/rsc/vgotest1/v2\" // v2/z.mod\n",
 	},
 	{
 		// redirect to github
@@ -261,7 +261,7 @@ var codeRepoTests = []struct {
 		// Because it's a package, Stat should fail entirely.
 		path: "github.com/rsc/quote/buggy",
 		rev:  "c4d4236f",
-		err:  "missing github.com/rsc/quote/buggy/go.mod at revision c4d4236f9242",
+		err:  "missing github.com/rsc/quote/buggy/z.mod at revision c4d4236f9242",
 	},
 	{
 		path:    "gopkg.in/yaml.v2",
@@ -568,7 +568,7 @@ var latestTests = []struct {
 	},
 	{
 		path: "github.com/rsc/vgotest1/subdir",
-		err:  "missing github.com/rsc/vgotest1/subdir/go.mod at revision a08abb797a67",
+		err:  "missing github.com/rsc/vgotest1/subdir/z.mod at revision a08abb797a67",
 	},
 	{
 		path:    "swtch.com/testmod",

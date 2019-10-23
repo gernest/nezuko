@@ -300,7 +300,7 @@ This makes it possible to copy code into alternate locations in vendor trees
 without needing to update import comments.
 
 Import path checking is also disabled when using modules.
-Import path comments are obsoleted by the go.mod file's module statement.
+Import path comments are obsoleted by the z.mod file's module statement.
 
 See https://golang.org/s/go14customimport for details.
 	`,
@@ -592,7 +592,7 @@ Additional information available from 'go env' but not read from the environment
 	GOHOSTOS
 		The operating system (GOOS) of the Go toolchain binaries.
 	GOMOD
-		The absolute path to the go.mod of the main module,
+		The absolute path to the z.mod of the main module,
 		or the empty string if not using modules.
 	GOTOOLDIR
 		The directory where the go tools (compile, cover, doc, etc...) are installed.

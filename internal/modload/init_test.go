@@ -13,15 +13,15 @@ import (
 
 func TestFindModuleRootIgnoreDir(t *testing.T) {
 	// In Plan 9, directories are automatically created in /n.
-	// For example, /n/go.mod always exist, but it's a directory.
-	// Test that we ignore directories when trying to find go.mod and other config files.
+	// For example, /n/z.mod always exist, but it's a directory.
+	// Test that we ignore directories when trying to find z.mod and other config files.
 
 	dir, err := ioutil.TempDir("", "gotest")
 	if err != nil {
 		t.Fatalf("failed to create temporary directory: %v", err)
 	}
 	defer os.RemoveAll(dir)
-	if err := os.Mkdir(filepath.Join(dir, "go.mod"), os.ModeDir|0755); err != nil {
+	if err := os.Mkdir(filepath.Join(dir, "z.mod"), os.ModeDir|0755); err != nil {
 		t.Fatalf("Mkdir failed: %v", err)
 	}
 	for _, name := range altConfigs {

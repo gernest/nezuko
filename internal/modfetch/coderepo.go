@@ -170,9 +170,9 @@ func (r *codeRepo) Versions(prefix string) ([]string, error) {
 
 	if len(incompatible) > 0 {
 		// Check for later versions that were created not following semantic import versioning,
-		// as indicated by the absence of a go.mod file. Those versions can be addressed
+		// as indicated by the absence of a z.mod file. Those versions can be addressed
 		// by referring to them with a +incompatible suffix, as in v17.0.0+incompatible.
-		files, err := r.code.ReadFileRevs(incompatible, "go.mod", codehost.MaxGoMod)
+		files, err := r.code.ReadFileRevs(incompatible, "z.mod", codehost.MaxGoMod)
 		if err != nil {
 			return nil, err
 		}
@@ -229,11 +229,11 @@ func (r *codeRepo) convert(info *codehost.RevInfo, statVers string) (*RevInfo, e
 
 		// If this is a plain tag (no dir/ prefix)
 		// and the module path is unversioned,
-		// and if the underlying file tree has no go.mod,
+		// and if the underlying file tree has no z.mod,
 		// then allow using the tag with a +incompatible suffix.
 		canUseIncompatible := false
 		if r.codeDir == "" && r.pathMajor == "" {
-			_, errGoMod := r.code.ReadFile(info.Name, "go.mod", codehost.MaxGoMod)
+			_, errGoMod := r.code.ReadFile(info.Name, "z.mod", codehost.MaxGoMod)
 			if errGoMod != nil {
 				canUseIncompatible = true
 			}
@@ -277,12 +277,12 @@ func (r *codeRepo) convert(info *codehost.RevInfo, statVers string) (*RevInfo, e
 	}
 
 	// Do not allow a successful stat of a pseudo-version for a subdirectory
-	// unless the subdirectory actually does have a go.mod.
+	// unless the subdirectory actually does have a z.mod.
 	if IsPseudoVersion(info2.Version) && r.codeDir != "" {
 		_, _, _, err := r.findDir(info2.Version)
 		if err != nil {
 			// TODO: It would be nice to return an error like "not a module".
-			// Right now we return "missing go.mod", which is a little confusing.
+			// Right now we return "missing z.mod", which is a little confusing.
 			return nil, err
 		}
 	}
@@ -320,9 +320,9 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 		return "", "", nil, err
 	}
 
-	// Load info about go.mod but delay consideration
-	// (except I/O error) until we rule out v2/go.mod.
-	file1 := path.Join(r.codeDir, "go.mod")
+	// Load info about z.mod but delay consideration
+	// (except I/O error) until we rule out v2/z.mod.
+	file1 := path.Join(r.codeDir, "z.mod")
 	gomod1, err1 := r.code.ReadFile(rev, file1, codehost.MaxGoMod)
 	if err1 != nil && !os.IsNotExist(err1) {
 		return "", "", nil, fmt.Errorf("reading %s/%s at revision %s: %v", r.pathPrefix, file1, rev, err1)
@@ -333,8 +333,8 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 	var file2 string
 	if r.pathMajor != "" && r.codeRoot != r.modPath && !strings.HasPrefix(r.pathMajor, ".") {
 		// Suppose pathMajor is "/v2".
-		// Either go.mod should claim v2 and v2/go.mod should not exist,
-		// or v2/go.mod should exist and claim v2. Not both.
+		// Either z.mod should claim v2 and v2/z.mod should not exist,
+		// or v2/z.mod should exist and claim v2. Not both.
 		// Note that we don't check the full path, just the major suffix,
 		// because of replacement modules. This might be a fork of
 		// the real module, found at a different path, usable only in
@@ -343,7 +343,7 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 		// TODO(bcmills): This doesn't seem right. Investigate futher.
 		// (Notably: why can't we replace foo/v2 with fork-of-foo/v3?)
 		dir2 := path.Join(r.codeDir, r.pathMajor[1:])
-		file2 = path.Join(dir2, "go.mod")
+		file2 = path.Join(dir2, "z.mod")
 		gomod2, err2 := r.code.ReadFile(rev, file2, codehost.MaxGoMod)
 		if err2 != nil && !os.IsNotExist(err2) {
 			return "", "", nil, fmt.Errorf("reading %s/%s at revision %s: %v", r.pathPrefix, file2, rev, err2)
@@ -352,7 +352,7 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 		found2 := err2 == nil && isMajor(mpath2, r.pathMajor)
 
 		if found1 && found2 {
-			return "", "", nil, fmt.Errorf("%s/%s and ...%s/go.mod both have ...%s module paths at revision %s", r.pathPrefix, file1, r.pathMajor, r.pathMajor, rev)
+			return "", "", nil, fmt.Errorf("%s/%s and ...%s/z.mod both have ...%s module paths at revision %s", r.pathPrefix, file1, r.pathMajor, r.pathMajor, rev)
 		}
 		if found2 {
 			return rev, dir2, gomod2, nil
@@ -365,16 +365,16 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 		}
 	}
 
-	// Not v2/go.mod, so it's either go.mod or nothing. Which is it?
+	// Not v2/z.mod, so it's either z.mod or nothing. Which is it?
 	if found1 {
-		// Explicit go.mod with matching module path OK.
+		// Explicit z.mod with matching module path OK.
 		return rev, r.codeDir, gomod1, nil
 	}
 	if err1 == nil {
-		// Explicit go.mod with non-matching module path disallowed.
+		// Explicit z.mod with non-matching module path disallowed.
 		suffix := ""
 		if file2 != "" {
-			suffix = fmt.Sprintf(" (and ...%s/go.mod does not exist)", r.pathMajor)
+			suffix = fmt.Sprintf(" (and ...%s/z.mod does not exist)", r.pathMajor)
 		}
 		if mpath1 == "" {
 			return "", "", nil, fmt.Errorf("%s is missing module path%s at revision %s", file1, suffix, rev)
@@ -386,16 +386,16 @@ func (r *codeRepo) findDir(version string) (rev, dir string, gomod []byte, err e
 	}
 
 	if r.codeDir == "" && (r.pathMajor == "" || strings.HasPrefix(r.pathMajor, ".")) {
-		// Implicit go.mod at root of repo OK for v0/v1 and for gopkg.in.
+		// Implicit z.mod at root of repo OK for v0/v1 and for gopkg.in.
 		return rev, "", nil, nil
 	}
 
-	// Implicit go.mod below root of repo or at v2+ disallowed.
+	// Implicit z.mod below root of repo or at v2+ disallowed.
 	// Be clear about possibility of using either location for v2+.
 	if file2 != "" {
-		return "", "", nil, fmt.Errorf("missing %s/go.mod and ...%s/go.mod at revision %s", r.pathPrefix, r.pathMajor, rev)
+		return "", "", nil, fmt.Errorf("missing %s/z.mod and ...%s/z.mod at revision %s", r.pathPrefix, r.pathMajor, rev)
 	}
-	return "", "", nil, fmt.Errorf("missing %s/go.mod at revision %s", r.pathPrefix, rev)
+	return "", "", nil, fmt.Errorf("missing %s/z.mod at revision %s", r.pathPrefix, rev)
 }
 
 func isMajor(mpath, pathMajor string) bool {
@@ -426,7 +426,7 @@ func (r *codeRepo) GoMod(version string) (data []byte, err error) {
 	if gomod != nil {
 		return gomod, nil
 	}
-	data, err = r.code.ReadFile(rev, path.Join(dir, "go.mod"), codehost.MaxGoMod)
+	data, err = r.code.ReadFile(rev, path.Join(dir, "z.mod"), codehost.MaxGoMod)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return r.legacyGoMod(rev, dir), nil
@@ -437,13 +437,13 @@ func (r *codeRepo) GoMod(version string) (data []byte, err error) {
 }
 
 func (r *codeRepo) legacyGoMod(rev, dir string) []byte {
-	// We used to try to build a go.mod reflecting pre-existing
+	// We used to try to build a z.mod reflecting pre-existing
 	// package management metadata files, but the conversion
 	// was inherently imperfect (because those files don't have
-	// exactly the same semantics as go.mod) and, when done
+	// exactly the same semantics as z.mod) and, when done
 	// for dependencies in the middle of a build, impossible to
 	// correct. So we stopped.
-	// Return a fake go.mod that simply declares the module path.
+	// Return a fake z.mod that simply declares the module path.
 	return []byte(fmt.Sprintf("module %s\n", modfile.AutoQuote(r.modPath)))
 }
 
@@ -514,7 +514,7 @@ func (r *codeRepo) Zip(dst io.Writer, version string) error {
 			return fmt.Errorf("zip file contains more than one top-level directory")
 		}
 		dir, file := path.Split(zf.Name)
-		if file == "go.mod" {
+		if file == "z.mod" {
 			haveGoMod[dir] = true
 		}
 	}
@@ -568,8 +568,8 @@ func (r *codeRepo) Zip(dst io.Writer, version string) error {
 			continue
 		}
 		base := path.Base(name)
-		if strings.ToLower(base) == "go.mod" && base != "go.mod" {
-			return fmt.Errorf("zip file contains %s, want all lower-case go.mod", zf.Name)
+		if strings.ToLower(base) == "z.mod" && base != "z.mod" {
+			return fmt.Errorf("zip file contains %s, want all lower-case z.mod", zf.Name)
 		}
 		if name == "LICENSE" {
 			haveLICENSE = true
