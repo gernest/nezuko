@@ -187,7 +187,7 @@ func (f *File) add(errs *bytes.Buffer, line *Line, verb string, args []string, f
 			fmt.Fprintf(errs, "%s:%d: repeated go statement\n", f.Syntax.Name, line.Start.Line)
 			return
 		}
-		if len(args) != 1 || !GoVersionRE.MatchString(args[0]) {
+		if len(args) != 1 || !IsValidExport(args[0]) {
 			fmt.Fprintf(errs, "%s:%d: usage: go 1.23\n", f.Syntax.Name, line.Start.Line)
 			return
 		}
