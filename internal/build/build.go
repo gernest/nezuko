@@ -63,7 +63,7 @@ func defaultGOPATH() string {
 		env = "home"
 	}
 	if home := os.Getenv(env); home != "" {
-		def := filepath.Join(home, "go")
+		def := filepath.Join(home, "zig")
 		return def
 	}
 	return ""
