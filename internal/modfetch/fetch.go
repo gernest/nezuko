@@ -70,7 +70,7 @@ func download(mod module.Version, dir string) (err error) {
 	}
 
 	if cfg.CmdName != "mod download" {
-		fmt.Fprintf(os.Stderr, "go: extracting %s %s\n", mod.Path, mod.Version)
+		fmt.Fprintf(os.Stderr, "z: extracting %s %s\n", mod.Path, mod.Version)
 	}
 
 	unlock, err := lockVersion(mod)
@@ -153,7 +153,7 @@ func DownloadZip(mod module.Version) (zipfile string, err error) {
 
 		// The zip file does not exist. Acquire the lock and create it.
 		if cfg.CmdName != "mod download" {
-			fmt.Fprintf(os.Stderr, "go: downloading %s %s\n", mod.Path, mod.Version)
+			fmt.Fprintf(os.Stderr, "z: downloading %s %s\n", mod.Path, mod.Version)
 		}
 		unlock, err := lockVersion(mod)
 		if err != nil {
@@ -292,7 +292,7 @@ func initGoSum() bool {
 	goSum.checked = make(map[modSum]bool)
 	data, err := ioutil.ReadFile(ZigSumFile)
 	if err != nil && !os.IsNotExist(err) {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 	goSum.enabled = true
 	readGoSum(goSum.m, ZigSumFile, data)
@@ -337,7 +337,7 @@ func readGoSum(dst map[module.Version][]string, file string, data []byte) {
 			continue
 		}
 		if len(f) != 3 {
-			base.Fatalf("go: malformed go.sum:\n%s:%d: wrong number of fields %v", file, lineno, len(f))
+			base.Fatalf("z: malformed go.sum:\n%s:%d: wrong number of fields %v", file, lineno, len(f))
 		}
 		if f[2] == emptyGoModHash {
 			// Old bug; drop it.
@@ -508,7 +508,7 @@ func WriteZigSum() {
 	}
 
 	if err := renameio.WriteFile(ZigSumFile, buf.Bytes()); err != nil {
-		base.Fatalf("go: writing go.sum: %v", err)
+		base.Fatalf("z: writing go.sum: %v", err)
 	}
 
 	goSum.checked = make(map[modSum]bool)

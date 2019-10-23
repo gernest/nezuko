@@ -97,15 +97,15 @@ func lockVersion(mod module.Version) (unlock func(), err error) {
 // directory. It returns a function that must be called to unlock the file.
 func SideLock() (unlock func()) {
 	if PkgMod == "" {
-		base.Fatalf("go: internal error: modfetch.PkgMod not set")
+		base.Fatalf("z: internal error: modfetch.PkgMod not set")
 	}
 	path := filepath.Join(PkgMod, "cache", "lock")
 	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
-		base.Fatalf("go: failed to create cache directory %s: %v", filepath.Dir(path), err)
+		base.Fatalf("z: failed to create cache directory %s: %v", filepath.Dir(path), err)
 	}
 	unlock, err := lockedfile.MutexAt(path).Lock()
 	if err != nil {
-		base.Fatalf("go: failed to lock file at %v", path)
+		base.Fatalf("z: failed to lock file at %v", path)
 	}
 	return unlock
 }
@@ -161,7 +161,7 @@ func (r *cachingRepo) Stat(rev string) (*RevInfo, error) {
 		}
 
 		if !QuietLookup {
-			fmt.Fprintf(os.Stderr, "go: finding %s %s\n", r.path, rev)
+			fmt.Fprintf(os.Stderr, "z: finding %s %s\n", r.path, rev)
 		}
 		info, err = r.r.Stat(rev)
 		if err == nil {
@@ -175,7 +175,7 @@ func (r *cachingRepo) Stat(rev string) (*RevInfo, error) {
 			}
 
 			if err := writeDiskStat(file, info); err != nil {
-				fmt.Fprintf(os.Stderr, "go: writing stat cache: %v\n", err)
+				fmt.Fprintf(os.Stderr, "z: writing stat cache: %v\n", err)
 			}
 		}
 		return cachedInfo{info, err}
@@ -191,7 +191,7 @@ func (r *cachingRepo) Stat(rev string) (*RevInfo, error) {
 func (r *cachingRepo) Latest() (*RevInfo, error) {
 	c := r.cache.Do("latest:", func() interface{} {
 		if !QuietLookup {
-			fmt.Fprintf(os.Stderr, "go: finding %s latest\n", r.path)
+			fmt.Fprintf(os.Stderr, "z: finding %s latest\n", r.path)
 		}
 		info, err := r.r.Latest()
 
@@ -239,7 +239,7 @@ func (r *cachingRepo) GoMod(rev string) ([]byte, error) {
 		if err == nil {
 			checkGoMod(r.path, rev, text)
 			if err := writeDiskGoMod(file, text); err != nil {
-				fmt.Fprintf(os.Stderr, "go: writing go.mod cache: %v\n", err)
+				fmt.Fprintf(os.Stderr, "z: writing go.mod cache: %v\n", err)
 			}
 		}
 		return cached{text, err}
@@ -502,7 +502,7 @@ func writeDiskCache(file string, data []byte) error {
 // after a new *.mod file has been written.
 func rewriteVersionList(dir string) {
 	if filepath.Base(dir) != "@v" {
-		base.Fatalf("go: internal error: misuse of rewriteVersionList")
+		base.Fatalf("z: internal error: misuse of rewriteVersionList")
 	}
 
 	listFile := filepath.Join(dir, "list")
@@ -514,7 +514,7 @@ func rewriteVersionList(dir string) {
 	// rewrite) it's better to serve a stale list than a truncated one.
 	unlock, err := lockedfile.MutexAt(listFile + ".lock").Lock()
 	if err != nil {
-		base.Fatalf("go: can't lock version list lockfile: %v", err)
+		base.Fatalf("z: can't lock version list lockfile: %v", err)
 	}
 	defer unlock()
 
@@ -551,6 +551,6 @@ func rewriteVersionList(dir string) {
 	}
 
 	if err := renameio.WriteFile(listFile, buf.Bytes()); err != nil {
-		base.Fatalf("go: failed to write version list: %v", err)
+		base.Fatalf("z: failed to write version list: %v", err)
 	}
 }

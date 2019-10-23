@@ -117,7 +117,7 @@ func ImportPaths(patterns []string) []*search.Match {
 						pkg = ""
 						if !iterating {
 							ModRoot()
-							base.Errorf("go: directory %s outside available modules", base.ShortPath(dir))
+							base.Errorf("z: directory %s outside available modules", base.ShortPath(dir))
 						}
 					}
 					info, err := os.Stat(dir)
@@ -185,7 +185,7 @@ func ImportPaths(patterns []string) []*search.Match {
 		if prev, ok := firstPath[src]; !ok {
 			firstPath[src] = mod.Path
 		} else if prev != mod.Path {
-			base.Errorf("go: %s@%s used for two different module paths (%s and %s)", src.Path, src.Version, prev, mod.Path)
+			base.Errorf("z: %s@%s used for two different module paths (%s and %s)", src.Path, src.Version, prev, mod.Path)
 		}
 	}
 	base.ExitIfErrors()
@@ -230,7 +230,7 @@ func ImportFromFiles(gofiles []string) {
 
 	imports, testImports, err := imports.ScanFiles(gofiles, imports.Tags())
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	loaded = newLoader()
@@ -488,7 +488,7 @@ func (ld *loader) load(roots func() []string) {
 	reqs := Reqs()
 	buildList, err = mvs.BuildList(Target, reqs)
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	added := make(map[string]bool)
@@ -512,7 +512,7 @@ func (ld *loader) load(roots func() []string) {
 		for _, pkg := range ld.pkgs {
 			if err, ok := pkg.err.(*ImportMissingError); ok && err.Module.Path != "" {
 				if added[pkg.path] {
-					base.Fatalf("go: %s: looping trying to add package", pkg.stackText())
+					base.Fatalf("z: %s: looping trying to add package", pkg.stackText())
 				}
 				added[pkg.path] = true
 				numAdded++
@@ -533,7 +533,7 @@ func (ld *loader) load(roots func() []string) {
 		reqs = Reqs()
 		buildList, err = mvs.BuildList(Target, reqs)
 		if err != nil {
-			base.Fatalf("go: %v", err)
+			base.Fatalf("z: %v", err)
 		}
 	}
 	base.ExitIfErrors()
@@ -941,12 +941,12 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 			gomod := filepath.Join(dir, "go.mod")
 			data, err := ioutil.ReadFile(gomod)
 			if err != nil {
-				base.Errorf("go: parsing %s: %v", base.ShortPath(gomod), err)
+				base.Errorf("z: parsing %s: %v", base.ShortPath(gomod), err)
 				return nil, ErrRequire
 			}
 			f, err := modfile.ParseLax(gomod, data, nil)
 			if err != nil {
-				base.Errorf("go: parsing %s: %v", base.ShortPath(gomod), err)
+				base.Errorf("z: parsing %s: %v", base.ShortPath(gomod), err)
 				return nil, ErrRequire
 			}
 			if f.Exports != nil {
@@ -963,26 +963,26 @@ func (r *mvsReqs) required(mod module.Version) ([]module.Version, error) {
 
 	if !semver.IsValid(mod.Version) {
 		// Disallow the broader queries supported by fetch.Lookup.
-		base.Fatalf("go: internal error: %s@%s: unexpected invalid semantic version", mod.Path, mod.Version)
+		base.Fatalf("z: internal error: %s@%s: unexpected invalid semantic version", mod.Path, mod.Version)
 	}
 
 	data, err := modfetch.GoMod(mod.Path, mod.Version)
 	if err != nil {
-		base.Errorf("go: %s@%s: %v\n", mod.Path, mod.Version, err)
+		base.Errorf("z: %s@%s: %v\n", mod.Path, mod.Version, err)
 		return nil, ErrRequire
 	}
 	f, err := modfile.ParseLax("go.mod", data, nil)
 	if err != nil {
-		base.Errorf("go: %s@%s: parsing go.mod: %v", mod.Path, mod.Version, err)
+		base.Errorf("z: %s@%s: parsing go.mod: %v", mod.Path, mod.Version, err)
 		return nil, ErrRequire
 	}
 
 	if f.Module == nil {
-		base.Errorf("go: %s@%s: parsing go.mod: missing module line", mod.Path, mod.Version)
+		base.Errorf("z: %s@%s: parsing go.mod: missing module line", mod.Path, mod.Version)
 		return nil, ErrRequire
 	}
 	if mpath := f.Module.Mod.Path; mpath != origPath && mpath != mod.Path {
-		base.Errorf("go: %s@%s: parsing go.mod: unexpected module path %q", mod.Path, mod.Version, mpath)
+		base.Errorf("z: %s@%s: parsing go.mod: unexpected module path %q", mod.Path, mod.Version, mpath)
 		return nil, ErrRequire
 	}
 	if f.Exports != nil {

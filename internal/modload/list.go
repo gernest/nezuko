@@ -49,10 +49,10 @@ func listModules(args []string, listVersions bool) []*modinfo.ModulePublic {
 	matchedBuildList := make([]bool, len(buildList))
 	for _, arg := range args {
 		if strings.Contains(arg, `\`) {
-			base.Fatalf("go: module paths never use backslash")
+			base.Fatalf("z: module paths never use backslash")
 		}
 		if search.IsRelativePath(arg) {
-			base.Fatalf("go: cannot use relative path %s to specify module", arg)
+			base.Fatalf("z: cannot use relative path %s to specify module", arg)
 		}
 		if i := strings.Index(arg, "@"); i >= 0 {
 			info, err := Query(arg[:i], arg[i+1:], nil)

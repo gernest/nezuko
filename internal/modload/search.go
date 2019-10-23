@@ -115,7 +115,7 @@ func matchPackages(pattern string, tags map[string]bool, useStd bool, modules []
 			var err error
 			root, _, err = fetch(mod)
 			if err != nil {
-				base.Errorf("go: %v", err)
+				base.Errorf("z: %v", err)
 				continue
 			}
 		}

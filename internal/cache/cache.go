@@ -336,7 +336,7 @@ func (c *Cache) putIndexEntry(id ActionID, out OutputID, size int64, allowVerify
 		old, err := c.get(id)
 		if err == nil && (old.OutputID != out || old.Size != size) {
 			// panic to show stack trace, so we can see what code is generating this cache entry.
-			msg := fmt.Sprintf("go: internal cache error: cache verify failed: id=%x changed:<<<\n%s\n>>>\nold: %x %d\nnew: %x %d", id, reverseHash(id), out, size, old.OutputID, old.Size)
+			msg := fmt.Sprintf("z: internal cache error: cache verify failed: id=%x changed:<<<\n%s\n>>>\nold: %x %d\nnew: %x %d", id, reverseHash(id), out, size, old.OutputID, old.Size)
 			panic(msg)
 		}
 	}

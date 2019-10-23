@@ -282,7 +282,7 @@ func Get(url string, options ...Option) error {
 	return err
 }
 
-var githubMessage = `go: 403 response from api.github.com
+var githubMessage = `z: 403 response from api.github.com
 
 GitHub applies fairly small rate limits to unauthenticated users, and
 you appear to be hitting them. To authenticate, please visit

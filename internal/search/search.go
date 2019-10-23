@@ -73,10 +73,10 @@ func MatchPackagesInFS(pattern string) *Match {
 	if modRoot != "" {
 		abs, err := filepath.Abs(dir)
 		if err != nil {
-			base.Fatalf("go: %v", err)
+			base.Fatalf("z: %v", err)
 		}
 		if !hasFilepathPrefix(abs, modRoot) {
-			base.Fatalf("go: pattern %s refers to dir %s, outside module root %s", pattern, abs, modRoot)
+			base.Fatalf("z: pattern %s refers to dir %s, outside module root %s", pattern, abs, modRoot)
 			return nil
 		}
 	}
@@ -222,7 +222,7 @@ func replaceVendor(x, repl string) string {
 func WarnUnmatched(matches []*Match) {
 	for _, m := range matches {
 		if len(m.Pkgs) == 0 {
-			fmt.Fprintf(os.Stderr, "go: warning: %q matched no packages\n", m.Pattern)
+			fmt.Fprintf(os.Stderr, "z: warning: %q matched no packages\n", m.Pattern)
 		}
 	}
 }

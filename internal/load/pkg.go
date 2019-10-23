@@ -98,12 +98,12 @@ type PackagePublic struct {
 	SysoFiles       []string `json:",omitempty"` // .syso system object files added to package
 
 	// Cgo directives
-	CgoCFLAGS    []string `json:",omitempty"` // cgo: flags for C compiler
-	CgoCPPFLAGS  []string `json:",omitempty"` // cgo: flags for C preprocessor
-	CgoCXXFLAGS  []string `json:",omitempty"` // cgo: flags for C++ compiler
-	CgoFFLAGS    []string `json:",omitempty"` // cgo: flags for Fortran compiler
-	CgoLDFLAGS   []string `json:",omitempty"` // cgo: flags for linker
-	CgoPkgConfig []string `json:",omitempty"` // cgo: pkg-config names
+	CgoCFLAGS    []string `json:",omitempty"` // cz: flags for C compiler
+	CgoCPPFLAGS  []string `json:",omitempty"` // cz: flags for C preprocessor
+	CgoCXXFLAGS  []string `json:",omitempty"` // cz: flags for C++ compiler
+	CgoFFLAGS    []string `json:",omitempty"` // cz: flags for Fortran compiler
+	CgoLDFLAGS   []string `json:",omitempty"` // cz: flags for linker
+	CgoPkgConfig []string `json:",omitempty"` // cz: pkg-config names
 
 	// Dependency information
 	Imports   []string          `json:",omitempty"` // import paths used by this package

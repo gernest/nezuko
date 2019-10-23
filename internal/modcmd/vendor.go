@@ -81,7 +81,7 @@ func runVendor(cmd *base.Command, args []string) {
 		}
 	}
 	if buf.Len() == 0 {
-		fmt.Fprintf(os.Stderr, "go: no dependencies to vendor\n")
+		fmt.Fprintf(os.Stderr, "z: no dependencies to vendor\n")
 		return
 	}
 	if err := ioutil.WriteFile(filepath.Join(vdir, "modules.txt"), buf.Bytes(), 0666); err != nil {

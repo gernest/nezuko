@@ -174,12 +174,12 @@ func runEdit(cmd *base.Command, args []string) {
 
 	data, err := ioutil.ReadFile(gomod)
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	modFile, err := modfile.Parse(gomod, data, nil)
 	if err != nil {
-		base.Fatalf("go: errors parsing %s:\n%s", base.ShortPath(gomod), err)
+		base.Fatalf("z: errors parsing %s:\n%s", base.ShortPath(gomod), err)
 	}
 
 	if *editModule != "" {
@@ -188,7 +188,7 @@ func runEdit(cmd *base.Command, args []string) {
 
 	if *editExports != "" {
 		if err := modFile.AddExportsStmt(*editExports); err != nil {
-			base.Fatalf("go: internal error: %v", err)
+			base.Fatalf("z: internal error: %v", err)
 		}
 	}
 
@@ -207,7 +207,7 @@ func runEdit(cmd *base.Command, args []string) {
 
 	out, err := modFile.Format()
 	if err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 
 	if *editPrint {
@@ -219,10 +219,10 @@ func runEdit(cmd *base.Command, args []string) {
 	defer unlock()
 	lockedData, err := ioutil.ReadFile(gomod)
 	if err == nil && !bytes.Equal(lockedData, data) {
-		base.Fatalf("go: go.mod changed during editing; not overwriting")
+		base.Fatalf("z: go.mod changed during editing; not overwriting")
 	}
 	if err := ioutil.WriteFile(gomod, out, 0666); err != nil {
-		base.Fatalf("go: %v", err)
+		base.Fatalf("z: %v", err)
 	}
 }
 
@@ -400,7 +400,7 @@ func editPrintJSON(modFile *modfile.File) {
 	}
 	data, err := json.MarshalIndent(&f, "", "\t")
 	if err != nil {
-		base.Fatalf("go: internal error: %v", err)
+		base.Fatalf("z: internal error: %v", err)
 	}
 	data = append(data, '\n')
 	os.Stdout.Write(data)

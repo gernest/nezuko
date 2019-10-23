@@ -129,7 +129,7 @@ func buildGoobj() error {
 		cmd.Env = append(os.Environ(), "GOPATH="+gopath)
 		out, err = cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("go install mycgo: %v\n%s", err, out)
+			return fmt.Errorf("go install mycz: %v\n%s", err, out)
 		}
 		pat := filepath.Join(gopath, "pkg", "*", "mycgo.a")
 		ms, err := filepath.Glob(pat)
