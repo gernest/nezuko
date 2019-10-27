@@ -468,11 +468,14 @@ func (ld *loader) reset() {
 type loadPkg struct {
 	path        string         // import path
 	mod         module.Version // module providing package
-	dir         string         // directory containing source code
-	imports     []*loadPkg     // packages imported by this one
-	err         error          // error loading package
-	stack       *loadPkg       // package importing this one in minimal import stack for this pkg
-	test        *loadPkg       // package with test imports, if we need test
+	modFile     *modfile.File
+	entryFile   string
+	exports     string
+	dir         string     // directory containing source code
+	imports     []*loadPkg // packages imported by this one
+	err         error      // error loading package
+	stack       *loadPkg   // package importing this one in minimal import stack for this pkg
+	test        *loadPkg   // package with test imports, if we need test
 	testOf      *loadPkg
 	testImports []string // test-only imports, saved for use by pkg.test.
 }
@@ -622,6 +625,24 @@ func (ld *loader) doPkg(item interface{}) {
 	if err != nil {
 		pkg.err = err
 		return
+	}
+	pkg.modFile = f
+	var entries []string
+	if f.Exports == nil {
+		pkg.err = errors.New("missing exports on package z.mod file")
+		return
+	}
+	if f.Exports != nil {
+		entries = append(entries, f.Exports.Name+".zig")
+		pkg.exports = f.Exports.Name
+	}
+	entries = append(entries, "lib.zig", "main.zig")
+	for _, entry := range entries {
+		n := cfg.BuildContext.JoinPath(pkg.dir, "src", entry)
+		if cfg.BuildContext.IsFile(n) {
+			pkg.entryFile = n
+			break
+		}
 	}
 	for _, r := range f.Require {
 		pkg.imports = append(pkg.imports, ld.pkg(r.Mod.Path, false))

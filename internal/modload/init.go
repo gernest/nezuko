@@ -14,8 +14,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime/debug"
+	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/gernest/nezuko/internal/base"
 	"github.com/gernest/nezuko/internal/cache"
@@ -573,6 +575,83 @@ func WriteGoMod() {
 		base.Fatalf("error writing z.mod: %v", err)
 	}
 	modFileData = new
+}
+
+const buildFileTpl = `const build_pkg = @import("std").build;
+const Builder = build_pkg.Builder;
+const LibExeObjStep = build_pkg.LibExeObjStep;
+const mod = @import("mod.zig");
+const ward = @import("std").debug.warn;
+
+pub fn build(b: *Builder) void {
+    mod.build(b);
+}
+
+const Pkg = struct {
+    name: []const u8,
+    path: []const u8,
+};
+const packages = [_]Pkg{
+	<<range . ->>
+	Pkg{.name= "<<.Export>>", .path="<<.Path>>"},
+	<<end>>
+};
+
+// addPackages looks for all top level steps and adds packages to them.
+fn addPackages(b: *Builder) void {
+    if (packages.len == 0) return;
+    var top_steps = b.top_level_steps.toSlice();
+    var i: usize = 0;
+    while (i < top_steps.len) : (i += 1) {
+        var step_ptr = &top_steps[i].step;
+        var step = @fieldParentPtr(LibExeObjStep, "step", step_ptr);
+        for (packages) |pkg| {
+            step.addPackagePath(pkg.name, pkg.path);
+        }
+    }
+}
+`
+
+var bTpl = template.Must(template.New("build").Delims("<<", ">>").Parse(buildFileTpl))
+
+type Pkg struct {
+	Export string
+	Path   string
+}
+
+func WriteZigBuildFile() {
+	loaded.load(func() []string {
+		return []string{Target.Path}
+	})
+	var pkgs []*Pkg
+	var dir string
+	for _, pkg := range loaded.pkgs {
+		if pkg.mod.Path == Target.Path {
+			dir = pkg.dir
+			continue
+		}
+		pkgs = append(pkgs, &Pkg{
+			Export: pkg.exports,
+			Path:   pkg.entryFile,
+		})
+	}
+	sort.Slice(pkgs, func(i, j int) bool {
+		return pkgs[i].Export < pkgs[j].Export
+	})
+	var buf bytes.Buffer
+	err := bTpl.Execute(&buf, pkgs)
+	if err != nil {
+		base.Fatalf("error generating build.zig: %v", err)
+		return
+	}
+	file := cfg.BuildContext.JoinPath(dir, "build.zig")
+	if err := renameio.WriteFile(file, buf.Bytes()); err != nil {
+		base.Fatalf("error writing build.zig: %v", err)
+	}
+}
+
+func getEntryFile() {
+
 }
 
 func fixVersion(path, vers string) (string, error) {

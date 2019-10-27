@@ -491,6 +491,7 @@ func runGet(cmd *base.Command, args []string) {
 	// Everything succeeded. Update z.mod.
 	modload.AllowWriteGoMod()
 	modload.WriteGoMod()
+	modload.WriteZigBuildFile()
 
 	// If -m was specified, we're done after the module work. No download, no build.
 	if *getM {

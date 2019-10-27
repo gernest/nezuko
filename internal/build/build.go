@@ -300,6 +300,10 @@ func (ctxt *Context) openFile(path string) (io.ReadCloser, error) {
 	return f, nil
 }
 
+func (ctxt *Context) IsFile(path string) bool {
+	return ctxt.isFile(path)
+}
+
 // isFile determines whether path is a file by trying to open it.
 // It reuses openFile instead of adding another function to the
 // list in Context.
