@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// go mod graph
+// z mod graph
 
 package modcmd
 
@@ -18,7 +18,7 @@ import (
 )
 
 var cmdGraph = &base.Command{
-	UsageLine: "go mod graph",
+	UsageLine: "z mod graph",
 	Short:     "print module requirement graph",
 	Long: `
 Graph prints the module requirement graph (with replacements applied)
@@ -31,7 +31,7 @@ path@version, except for the main module, which has no @version suffix.
 
 func runGraph(cmd *base.Command, args []string) {
 	if len(args) > 0 {
-		base.Fatalf("go mod graph: graph takes no arguments")
+		base.Fatalf("z mod graph: graph takes no arguments")
 	}
 	modload.LoadBuildList()
 

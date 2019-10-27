@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// go mod tidy
+// z mod tidy
 
 package modcmd
 
@@ -18,7 +18,7 @@ import (
 )
 
 var cmdTidy = &base.Command{
-	UsageLine: "go mod tidy [-v]",
+	UsageLine: "z mod tidy [-v]",
 	Short:     "add missing and remove unused modules",
 	Long: `
 Tidy makes sure z.mod matches the source code in the module.
@@ -39,7 +39,7 @@ func init() {
 
 func runTidy(cmd *base.Command, args []string) {
 	if len(args) > 0 {
-		base.Fatalf("go mod tidy: no arguments allowed")
+		base.Fatalf("z mod tidy: no arguments allowed")
 	}
 
 	// LoadALL adds missing modules.

@@ -123,7 +123,7 @@ code and dependencies. If instead the go command is running in GOPATH
 mode, the details of get's flags and effects change, as does 'go help get'.
 See 'go help modules' and 'go help gopath-get'.
 
-See also: go build, go install, go clean, go mod.
+See also: go build, go install, go clean, z mod.
 	`,
 }
 

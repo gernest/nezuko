@@ -768,7 +768,7 @@ func isVersionElement(s string) bool {
 	return true
 }
 
-// ModuleImportPath translates import paths found in go modules
+// ModuleImportPath translates import paths found in z modules
 // back down to paths that can be resolved in ordinary builds.
 //
 // Define “new” code as code with a z.mod file in the same directory

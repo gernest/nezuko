@@ -427,7 +427,7 @@ func Lookup(path string) (dir, realPath string, err error) {
 // Although most of the loading state is maintained in the loader struct,
 // one key piece - the build list - is a global, so that it can be modified
 // separate from the loading operation, such as during "go get"
-// upgrades/downgrades or in "go mod" operations.
+// upgrades/downgrades or in "z mod" operations.
 // TODO(rsc): It might be nice to make the loader take and return
 // a buildList rather than hard-coding use of the global.
 type loader struct {
@@ -758,7 +758,7 @@ func (pkg *loadPkg) stackText() string {
 	return buf.String()
 }
 
-// why returns the text to use in "go mod why" output about the given package.
+// why returns the text to use in "z mod why" output about the given package.
 // It is less ornate than the stackText but contains the same information.
 func (pkg *loadPkg) why() string {
 	var buf strings.Builder
@@ -778,7 +778,7 @@ func (pkg *loadPkg) why() string {
 	return buf.String()
 }
 
-// Why returns the "go mod why" output stanza for the given package,
+// Why returns the "z mod why" output stanza for the given package,
 // without the leading # comment.
 // The package graph must have been loaded already, usually by LoadALL.
 // If there is no reason for the package to be in the current build,

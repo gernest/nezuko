@@ -42,8 +42,8 @@ var (
 
 	gopath string
 
-	CmdModInit   bool   // running 'go mod init'
-	CmdModModule string // module argument for 'go mod init'
+	CmdModInit   bool   // running 'z mod init'
+	CmdModModule string // module argument for 'z mod init'
 )
 
 // ModFile returns the parsed z.mod file.
@@ -260,7 +260,7 @@ func InitMod() {
 	}
 
 	if CmdModInit {
-		// Running go mod init: do legacy module conversion
+		// Running z mod init: do legacy module conversion
 		legacyModInit()
 		modFileToBuildList()
 		WriteGoMod()
@@ -382,7 +382,7 @@ func FindModuleRoot(dir, limit string, legacyConfigOK bool) (root, file string) 
 // Exported only for testing.
 func FindModulePath(dir string) (string, error) {
 	if CmdModModule != "" {
-		// Running go mod init x/y/z; return x/y/z.
+		// Running z mod init x/y/z; return x/y/z.
 		return CmdModModule, nil
 	}
 

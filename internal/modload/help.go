@@ -84,12 +84,12 @@ For more about the z.mod file, see 'go help z.mod'.
 
 To start a new module, simply create a z.mod file in the root of the
 module's directory tree, containing only a module statement.
-The 'go mod init' command can be used to do this:
+The 'z mod init' command can be used to do this:
 
-	go mod init example.com/m
+	z mod init example.com/m
 
 In a project already using an existing dependency management tool like
-godep, glide, or dep, 'go mod init' will also add require statements
+godep, glide, or dep, 'z mod init' will also add require statements
 matching the existing configuration.
 
 Once the z.mod file exists, no additional steps are required:
@@ -146,7 +146,7 @@ package from the module. On the other hand, determining that a module requiremen
 is no longer necessary and can be deleted requires a full view of
 all packages in the module, across all possible build configurations
 (architectures, operating systems, build tags, and so on).
-The 'go mod tidy' command builds that view and then
+The 'z mod tidy' command builds that view and then
 adds any missing module requirements and removes unnecessary ones.
 
 As part of maintaining the require statements in z.mod, the go command
@@ -169,7 +169,7 @@ makes these implied changes as well. If z.mod is edited directly, commands
 like 'go build' or 'go list' will assume that an upgrade is intended and
 automatically make any implied upgrades and update z.mod to reflect them.
 
-The 'go mod' command provides other functionality for use in maintaining
+The 'z mod' command provides other functionality for use in maintaining
 and understanding modules and z.mod files. See 'go help mod'.
 
 The -mod build flag provides additional control over updating and use of z.mod.
@@ -179,7 +179,7 @@ automatic updating of z.mod described above. Instead, it fails when any changes
 to z.mod are needed. This setting is most useful to check that z.mod does
 not need updates, such as in a continuous integration and testing system.
 The "go get" command remains permitted to update z.mod even with -mod=readonly,
-and the "go mod" commands do not take the -mod flag (or any other build flags).
+and the "z mod" commands do not take the -mod flag (or any other build flags).
 
 If invoked with -mod=vendor, the go command assumes that the vendor
 directory holds the correct copies of dependencies and ignores
@@ -347,7 +347,7 @@ The go command maintains a cache of downloaded packages and computes
 and records the cryptographic checksum of each package at download time.
 In normal operation, the go command checks these pre-computed checksums
 against the main module's go.sum file, instead of recomputing them on
-each command invocation. The 'go mod verify' command checks that
+each command invocation. The 'z mod verify' command checks that
 the cached copies of module downloads still match both their recorded
 checksums and the entries in go.sum.
 
@@ -366,7 +366,7 @@ By default, the go command satisfies dependencies by downloading modules
 from their sources and using those downloaded copies (after verification,
 as described in the previous section). To allow interoperation with older
 versions of Go, or to ensure that all files used for a build are stored
-together in a single file tree, 'go mod vendor' creates a directory named
+together in a single file tree, 'z mod vendor' creates a directory named
 vendor in the root directory of the main module and stores there all the
 packages from dependency modules that are needed to support builds and
 tests of packages in the main module.
@@ -417,7 +417,7 @@ like in Go imports:
 	)
 
 The z.mod file is designed both to be edited directly and to be
-easily updated by tools. The 'go mod edit' command can be used to
+easily updated by tools. The 'z mod edit' command can be used to
 parse and edit the z.mod file from programs and tools.
 See 'go help mod edit'.
 
@@ -459,7 +459,7 @@ that future mechanical changes will result in minimal diffs.
 
 Because the module graph defines the meaning of import statements, any
 commands that load packages also use and therefore update z.mod,
-including go build, go get, go install, go list, go test, go mod graph,
-go mod tidy, and go mod why.
+including go build, go get, go install, go list, go test, z mod graph,
+z mod tidy, and z mod why.
 	`,
 }

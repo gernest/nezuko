@@ -15,7 +15,7 @@ import (
 )
 
 var cmdDownload = &base.Command{
-	UsageLine: "go mod download [-json] [modules]",
+	UsageLine: "z mod download [-json] [modules]",
 	Short:     "download modules to local cache",
 	Long: `
 Download downloads the named modules, which can be module patterns selecting
@@ -23,7 +23,7 @@ dependencies of the main module or module queries of the form path@version.
 With no arguments, download applies to all dependencies of the main module.
 
 The go command will automatically download modules as needed during ordinary
-execution. The "go mod download" command is useful mainly for pre-filling
+execution. The "z mod download" command is useful mainly for pre-filling
 the local cache or to compute the answers for a Go module proxy.
 
 By default, download reports errors to standard error but is otherwise silent.

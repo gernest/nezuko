@@ -66,7 +66,7 @@ BigCmdLoop:
 					base.Exit()
 				}
 				if args[0] == "help" {
-					// Accept 'go mod help' and 'go mod help foo' for 'go help mod' and 'go help mod foo'.
+					// Accept 'z mod help' and 'z mod help foo' for 'go help mod' and 'go help mod foo'.
 					help.Help(os.Stdout, append(strings.Split(cfg.CmdName, " "), args[1:]...))
 					return
 				}

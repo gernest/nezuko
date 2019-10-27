@@ -18,14 +18,14 @@ import (
 )
 
 var cmdVerify = &base.Command{
-	UsageLine: "go mod verify",
+	UsageLine: "z mod verify",
 	Short:     "verify dependencies have expected content",
 	Long: `
 Verify checks that the dependencies of the current module,
 which are stored in a local downloaded source cache, have not been
 modified since being downloaded. If all the modules are unmodified,
 verify prints "all modules verified." Otherwise it reports which
-modules have been changed and causes 'go mod' to exit with a
+modules have been changed and causes 'z mod' to exit with a
 non-zero status.
 	`,
 	Run: runVerify,
@@ -34,7 +34,7 @@ non-zero status.
 func runVerify(cmd *base.Command, args []string) {
 	if len(args) != 0 {
 		// NOTE(rsc): Could take a module pattern.
-		base.Fatalf("go mod verify: verify takes no arguments")
+		base.Fatalf("z mod verify: verify takes no arguments")
 	}
 	ok := true
 	for _, mod := range modload.LoadBuildList()[1:] {
