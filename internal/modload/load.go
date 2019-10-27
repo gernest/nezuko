@@ -314,7 +314,7 @@ func loadAll(testAll bool) []string {
 	if !testAll {
 		loaded.testRoots = true
 	}
-	all := TargetPackages()
+	all := []string{Target.Path}
 	loaded.load(func() []string { return all })
 	WriteGoMod()
 
@@ -596,46 +596,35 @@ func (ld *loader) pkg(path string, isRoot bool) *loadPkg {
 func (ld *loader) doPkg(item interface{}) {
 	// TODO: what about replacements?
 	pkg := item.(*loadPkg)
-	var imports []string
-	if pkg.testOf != nil {
-		pkg.dir = pkg.testOf.dir
-		pkg.mod = pkg.testOf.mod
-		imports = pkg.testOf.testImports
-	} else {
-		if strings.Contains(pkg.path, "@") {
-			// Leave for error during load.
-			return
-		}
-		if build.IsLocalImport(pkg.path) {
-			// Leave for error during load.
-			// (Module mode does not allow local imports.)
-			return
-		}
-
-		pkg.mod, pkg.dir, pkg.err = Import(pkg.path)
-		if pkg.dir == "" {
-			return
-		}
-		var testImports []string
-		var err error
-		imports, testImports, err = scanDir(pkg.dir, ld.tags)
-		if err != nil {
-			pkg.err = err
-			return
-		}
-		if pkg.test != nil {
-			pkg.testImports = testImports
-		}
+	if strings.Contains(pkg.path, "@") {
+		// Leave for error during load.
+		return
+	}
+	if build.IsLocalImport(pkg.path) {
+		// Leave for error during load.
+		// (Module mode does not allow local imports.)
+		return
 	}
 
-	for _, path := range imports {
-		pkg.imports = append(pkg.imports, ld.pkg(path, false))
+	pkg.mod, pkg.dir, pkg.err = Import(pkg.path)
+	if pkg.dir == "" {
+		return
+	}
+	var err error
+	gomod := filepath.Join(pkg.dir, "z.mod")
+	data, err := ioutil.ReadFile(gomod)
+	if err != nil {
+		pkg.err = err
+		return
 	}
 
-	// Now that pkg.dir, pkg.mod, pkg.testImports are set, we can queue pkg.test.
-	// TODO: All that's left is creating new imports. Why not just do it now?
-	if pkg.test != nil {
-		ld.work.Add(pkg.test)
+	f, err := modfile.Parse(gomod, data, fixVersion)
+	if err != nil {
+		pkg.err = err
+		return
+	}
+	for _, r := range f.Require {
+		pkg.imports = append(pkg.imports, ld.pkg(r.Mod.Path, false))
 	}
 }
 
