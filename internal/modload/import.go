@@ -163,7 +163,6 @@ func Import(path string) (m module.Version, dir string, err error) {
 			}
 		}
 	}
-
 	m, _, err = QueryPackage(path, "latest", Allowed)
 	if err != nil {
 		if _, ok := err.(*codehost.VCSError); ok {
@@ -245,7 +244,7 @@ func dirInModule(path, mpath, mdir string, isLocal bool) (dir string, haveGoFile
 		defer f.Close()
 		names, _ := f.Readdirnames(-1)
 		for _, name := range names {
-			if strings.HasSuffix(name, ".go") {
+			if strings.HasSuffix(name, ".zig") {
 				info, err := os.Stat(filepath.Join(dir, name))
 				if err == nil && info.Mode().IsRegular() {
 					return true

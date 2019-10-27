@@ -496,7 +496,12 @@ func LoadImport(path, srcDir string, parent *Package, stk *ImportStack, importPo
 			bp = new(build.Package)
 			err = fmt.Errorf("unknown import path %q: internal error: module loader did not resolve import", importPath)
 		} else {
-			bp, err = cfg.BuildContext.Import(path, srcDir)
+			buildMode := build.ImportComment
+			if mode&ResolveImport == 0 || path != origPath {
+				// Not vendoring, or we already found the vendored path.
+				buildMode |= build.IgnoreVendor
+			}
+			bp, err = cfg.BuildContext.Import(path, srcDir, buildMode)
 		}
 		bp.ImportPath = importPath
 		if modDir == "" && err == nil && !isLocal && bp.ImportComment != "" && bp.ImportComment != path &&
@@ -805,7 +810,7 @@ HaveGoMod:
 	// if GOPATH/src/x/y/z.mod says module "x/y/v2",
 
 	// If x/y/v2/z exists, use it unmodified.
-	if bp, _ := cfg.BuildContext.Import(path, ""); bp.Dir != "" {
+	if bp, _ := cfg.BuildContext.Import(path, "", build.IgnoreVendor); bp.Dir != "" {
 		return path
 	}
 
@@ -820,7 +825,7 @@ HaveGoMod:
 		if i < 0 {
 			return path
 		}
-		if bp, _ := cfg.BuildContext.Import(path[:i], ""); bp.Dir != "" {
+		if bp, _ := cfg.BuildContext.Import(path[:i], "", build.IgnoreVendor); bp.Dir != "" {
 			if mpath := goModPath(bp.Dir); mpath != "" {
 				// Found a valid z.mod file, so we're stopping the search.
 				// If the path is m/v2/p and we found m/z.mod that says
@@ -1450,7 +1455,25 @@ func loadPackage(arg string, stk *ImportStack) *Package {
 	if arg == "" {
 		panic("loadPackage called with empty package path")
 	}
-	return nil
+
+	// Wasn't a command; must be a package.
+	// If it is a local import path but names a standard package,
+	// we treat it as if the user specified the standard package.
+	// This lets you run go test ./ioutil in package io and be
+	// referring to io/ioutil rather than a hypothetical import of
+	// "./ioutil".
+	if build.IsLocalImport(arg) || filepath.IsAbs(arg) {
+		dir := arg
+		if !filepath.IsAbs(arg) {
+			dir = filepath.Join(base.Cwd, arg)
+		}
+		bp, _ := cfg.BuildContext.ImportDir(dir, 0)
+		if bp.ImportPath != "" && bp.ImportPath != "." {
+			arg = bp.ImportPath
+		}
+	}
+
+	return LoadImport(arg, base.Cwd, nil, stk, nil, 0)
 }
 
 // Packages returns the packages named by the

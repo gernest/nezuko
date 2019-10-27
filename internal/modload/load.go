@@ -227,7 +227,6 @@ func warnPattern(pattern string, list []string) []string {
 // to satisfy the imports in the named Go source files.
 func ImportFromFiles(gofiles []string) {
 	InitMod()
-
 	imports, testImports, err := imports.ScanFiles(gofiles, imports.Tags())
 	if err != nil {
 		base.Fatalf("z: %v", err)
