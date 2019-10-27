@@ -20,6 +20,5 @@ var CmdMod = &base.Command{
 		cmdTidy,
 		cmdVendor,
 		cmdVerify,
-		cmdWhy,
 	},
 }
